@@ -266,7 +266,7 @@ $(document).ready(function () {
 
                 getpointscenter_quick();
                 $('#edit_a_number_modal').modal('hide');
-                toastr.success("شكرا لك ، تم تغيير الاسم بنجاح يرجى تحديث نتيجة البحث.");
+                toastr.success("Thank you, the name has been successfully changed please refresh the search result.");
 
             },
             error: function (error) {
@@ -307,7 +307,7 @@ $(document).ready(function () {
 
                 $('#activate_deactivate_modal').modal('hide');
                 AndroidFunction.change_acc_status($('#txt_next_account_status').val());
-                AndroidFunction.toast_it("شكرا لك ، لقد تم تغيير حالة حسابك.");
+                AndroidFunction.toast_it("Thank you, your account status has been changed.");
 
                 try {
                     AndroidFunction.device_ready();
@@ -364,7 +364,7 @@ $(document).ready(function () {
 
     $('#left_menu_near_by_places').bind('click', function () {
         $('.nav-menu').trigger('click');
-         back_to_home();
+        // back_to_home();
         $('#random_people').css('display', 'none');
         $('#li_rearch_result').css('display', 'none');
         $('#phone_verification').css('display', 'none');
@@ -949,7 +949,7 @@ function get_places_details(tps, myid) {
 
     var selected_cat = $($('#' + myid).find('.pull-left')).html();
 
-    $('#sub_places_result_effect').html("<b>\"" + selected_cat + "\"</b> Search Result..");
+    $('#sub_places_result_effect').html("<b>\"" + selected_cat + "\"</b> Search Result.");
 
 
     show_loading();
@@ -1120,7 +1120,7 @@ function searfor() {
 
 
     $('#result_effect').html('<img src="img/spinner-rosetta-blue.gif" style="width:24px;"/>');
-    $('#sub_result_effect').html("\"" + $('#srch-term').val() + "\" جاري البحث");
+    $('#sub_result_effect').html("\"" + $('#srch-term').val() + "\" Search Result.");
 
     show_loading();
 
@@ -1155,7 +1155,7 @@ function searfor() {
                 if (data.t.length == 0) {
                     $('#result_effect_img').addClass('fa-frown-o');
                     $('#result_effect').html("");
-                    $('#li_rearch_result').html('<div >لا توجد نتائج .....</div>');
+                    $('#li_rearch_result').html('<div >Nothing Found ...</div>');
                     // ask_yamli();
                 }
                 else {
@@ -1231,7 +1231,7 @@ function searfor() {
                     $('#li_rearch_result').html(markup);
 
 
-                    var load_more_markup = '<li class="load-more"  style="height:80px;width:100%;"  data-icon="refresh"><table align="center" style="width:100%;"><tr><td style="vertical-align:middle"><img src="img/interact.png" style="width:48px;float:right;" /></td><td style="vertical-align:middle"><span style="color:#669900;"> المزيد ...</span></td><td style="vertical-align:middle"><div id="dvloadmorewait"></div></td></tr></table></li>';
+                    var load_more_markup = '<li class="load-more"  style="height:80px;width:100%;"  data-icon="refresh"><table align="center" style="width:100%;"><tr><td style="vertical-align:middle"><img src="img/interact.png" style="width:48px;float:right;" /></td><td style="vertical-align:middle"><span style="color:#669900;"> Load More ...</span></td><td style="vertical-align:middle"><div id="dvloadmorewait"></div></td></tr></table></li>';
 
                     $('#pnl_result_footer_load_more').html(load_more_markup);
 
@@ -2837,7 +2837,7 @@ function submit_profile() {
 
                     send_to_native();
 
-                    $('#required').html(test).show('fast').delay(1000).fadeOut(1500, function () {
+                    $('#required').html(test).show('fast').delay(1000).fadeOut(500, function () {
 
                         back_to_homeback_to_home_only();
 
