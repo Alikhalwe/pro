@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="jquery.auto-complete.css">
 
 
-   <!-- <link type="text/css" href="assets/globals/plugins/form-select2/select2.css" rel="stylesheet"> -->
+   <link type="text/css" href="select2.css" rel="stylesheet">
 
     <link href="sb-admin-2.css" rel="stylesheet">
 
@@ -239,12 +239,12 @@
         <div class="nav-country" style="color:#FFF;font-size:11pt;width: auto !important;margin-left:10px;">
             <img id="imgcountryflag" src="sa.png" style=";height: 28px;margin-top: -1px;" />
 
-            <span id="lbl_header_country_name">KSA</span></div><!--.nav-search-->
+            <span id="lbl_header_country_name"></span></div><!--.nav-search-->
 
         <div class="nav-user">
             <div class="user">
                 <img id="img_main_profile_rounded" src="sad.png" alt="" style="width:50px;height:50px;">
-                <span style="display:none;" class="badge" id="profile_badge_notif">3</span>
+                <span style="" class="badge" id="profile_badge_notif">Aliتطوير </span>
             </div><!--.user-->
             <div class="cross">
                 <span class="line"></span>
@@ -260,7 +260,7 @@
             </div><!--.starting-point-->
             <div class="logo">Crystal Ali</div><!--.logo-->
         </div><!--.overlay-->
-        <div class="overlay-secondary">you</div><!--.overlay-secondary-->
+        <div class="overlay-secondary"></div><!--.overlay-secondary-->
         <!-- END OF OVERLAY HELPERS -->
         <div id="loading_bar" class="loading-bar indeterminate" style="display:none"></div>
     </div><!--.nav-bar-container-->
@@ -272,16 +272,16 @@
                     <input type="text" style="height:41px !important;font-size:12pt;color:#263238 !important;border: 1px solid #0288D1 !important;padding-left: 10px;" id="srch-term" name="srch-term" class="form-control" placeholder="إبحث هنا..." />
                         <button id="btnsearch" style=" position: absolute;right: 0px;top: 0px;color:#3e50b4;  font-size: 18px;" class="btn btn-default">
                       
-                            <i class="ion-android-microphone" id="btnsearch_loop"></i>
+						  <i class="ion-android-microphone" id="btnsearch_loop" style="color:#112244"></i>
                             <i class="glyphicon" id="btnsearch_loading" style="display: none;">
-                                <img style="width: 13px;" src="spinner-rosetta-blue.gif" >
+                                 <img style="width: 13px;" src="spinner-rosetta-blue.gif" >
                             </i>
                     </button>
   
                         <span id="spn_selected_country_code" style="font-size: 12pt;position: absolute;z-index: 3;right: 60px;top: 2px;color: #44f;"></span>
-                        <img id="imgcountryflag" src="sa.png" style="width: 20px;position: absolute;z-index: 3;right: 30px;top: 5px;" />
-                        <select style="float:left; display:none" id="cmbcountries" class="populate select2-offscreen" tabindex="-1">
-                            <option value="ALL" ccode="+966" flg="NOTNA.png" selected>جميع الدول</option>
+                        <img id="imgcountryflag" src="NOTNA.png" style="width: 20px;position: absolute;z-index: 3;right: 30px;top: 5px;" />
+                        <select style="float:left; " id="cmbcountries" class="populate select2-offscreen" tabindex="-1">
+                            <option value="ALL" ccode="ALL" flg="NOTNA.png" selected>جميع الدول</option>
                             <option value="sa" ccode="+966" flg="sa.png">المملكة العربية السعودية</option>
                             
                             <option value="af" ccode="+93" flg="af.png">Afghanistan</option>
@@ -561,7 +561,7 @@
 				  <div id="cmb_countries_firer" style="width:42px;float:right;display:none">
                         <div class="btn btn-default" style="height: 32px;">
 
-						  <i class="glyphicon" id="btnsearch_loading" style="display:none;">
+						  <i class="glyphicon" id="btnsearch_loading" style=";">
 
                             </i>
                         </div>
@@ -570,10 +570,11 @@
 
                 </div>
 			  <h4 style="float:left; display:none"> اللي حولك<small id="txt_near_country_name"> </small></h4>
-                <ol class="breadcrumb">
+               <ol class="breadcrumb">
             <li style="float:left;display:none"><a style="text-decoration: underline;" href="a/index.html" id="">مجهول</a></li>  
-            <li style="display:none"> <a href="#" style="display:none">تجربة</a>شرح</li>
+           
                     <li style="float:right; "><a style=";text-decoration: underline;" href="#" id="header_logo">إكتشاف</a></li>
+             
                 </ol>
             </div>
         </div><!--.row-->
@@ -1812,14 +1813,14 @@
     <script src="global-vendors.js"></script>
     <!-- END GLOBAL AND THEME VENDORS -->
     <!-- BEGIN PLUGINS AREA -->
-    <script src="http://maps.google.com/maps/api/js?sensor=true&amp;libraries=places"></script>
+   <!--<script src="http://maps.google.com/maps/api/js?sensor=true&amp;libraries=places"></script>-->
     <!--<script src="assets/globals/plugins/gmaps/gmaps.js"></script>-->
     <script src="jquery.bxslider.min.js"></script>
     <script src="audio.min.js"></script>
     <script src="d3.min.js"></script>
     <!--<script src="assets/globals/plugins/rickshaw/rickshaw.min.js"></script>-->
-    <!--<script src="assets/globals/plugins/jquery-knob/excanvas.js"></script>
-    <script src="assets/globals/plugins/jquery-knob/dist/jquery.knob.min.js"></script>-->
+    <!--<script src="assets/globals/plugins/jquery-knob/excanvas.js"></script>-->
+    <!--<script src="assets/globals/plugins/jquery-knob/dist/jquery.knob.min.js"></script>-->
     <script src="gauge.min.js"></script>
     <script src="jquery.autocomplete.js"></script>
 
