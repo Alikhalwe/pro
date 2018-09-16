@@ -949,7 +949,7 @@ function get_places_details(tps, myid) {
 
     var selected_cat = $($('#' + myid).find('.pull-left')).html();
 
-    $('#sub_places_result_effect').html("<b>\"" + selected_cat + "\"</b> Search Result.");
+    $('#sub_places_result_effect').html("<b>\"" + selected_cat + "\"</b> يتم البحث.");
 
 
     show_loading();
@@ -1009,7 +1009,7 @@ function onsynkConfirm(button) {
 
 function show_loading() {
     $('#loading_bar').css('display', '');
-    $('#dvloading').html('<img src="img/flyingdots.gif"/>');
+    $('#dvloading').html('<img src="flyingdots.gif"/>');
 }
 
 function hide_loading() {
@@ -1119,8 +1119,8 @@ function searfor() {
     $('#li_list_of_pre_words').css('display', 'none');
 
 
-    $('#result_effect').html('<img src="img/spinner-rosetta-blue.gif" style="width:24px;"/>');
-    $('#sub_result_effect').html("\"" + $('#srch-term').val() + "\" Search Result.");
+    $('#result_effect').html('<img src="spinner-rosetta-blue.gif" style="width:24px;"/>');
+    $('#sub_result_effect').html("\"" + $('#srch-term').val() + "\" يتم البحث.");
 
     show_loading();
 
@@ -1196,13 +1196,13 @@ function searfor() {
                         else {
                             var person_gender = "";
                             if (item.Gender == "") {
-                                person_gender = "img/gnome_stock_person.png";
+                                person_gender = "gnome_stock_person.png";
                             }
                             if (item.Gender == "M") {
-                                person_gender = "img/gnome_stock_personmale.png";
+                                person_gender = "gnome_stock_personmale.png";
                             }
                             if (item.Gender == "F") {
-                                person_gender = "img/gnome_stock_personfame.png";
+                                person_gender = "gnome_stock_personfame.png";
                             }
 
                             tempresult = tempresult.replace('**pic**', person_gender);
@@ -1231,7 +1231,7 @@ function searfor() {
                     $('#li_rearch_result').html(markup);
 
 
-                    var load_more_markup = '<li class="load-more"  style="height:80px;width:100%;"  data-icon="refresh"><table align="center" style="width:100%;"><tr><td style="vertical-align:middle"><img src="img/interact.png" style="width:48px;float:right;" /></td><td style="vertical-align:middle"><span style="color:#669900;"> Load More ...</span></td><td style="vertical-align:middle"><div id="dvloadmorewait"></div></td></tr></table></li>';
+                    var load_more_markup = '<li class="load-more"  style="height:80px;width:100%;"  data-icon="refresh"><table align="center" style="width:100%;"><tr><td style="vertical-align:middle"><img src="interact.png" style="width:48px;float:right;" /></td><td style="vertical-align:middle"><span style="color:#669900;"> جاري البحث ...</span></td><td style="vertical-align:middle"><div id="dvloadmorewait"></div></td></tr></table></li>';
 
                     $('#pnl_result_footer_load_more').html(load_more_markup);
 
@@ -1459,7 +1459,7 @@ function loadmoreResult() {
         option_c_code = "ALL";
     }
 
-    $('#dvloadmorewait').html('<img src="img/spinner-rosetta-blue.gif" style="width:24px;"/>');
+    $('#dvloadmorewait').html('<img src="spinner-rosetta-blue.gif" style="width:24px;"/>');
 
     $('#li_rearch_result').css('display', '');
     $('#profile_settings').css('display', 'none');
@@ -1536,13 +1536,13 @@ function loadmoreResult() {
                     else {
                         var person_gender = "";
                         if (item.Gender == "") {
-                            person_gender = "img/gnome_stock_person.png";
+                            person_gender = "gnome_stock_person.png";
                         }
                         if (item.Gender == "M") {
-                            person_gender = "img/gnome_stock_personmale.png";
+                            person_gender = "gnome_stock_personmale.png";
                         }
                         if (item.Gender == "F") {
-                            person_gender = "img/gnome_stock_personfame.png";
+                            person_gender = "gnome_stock_personfame.png";
                         }
 
                         tempresult = tempresult.replace('**pic**', person_gender);
@@ -1801,7 +1801,7 @@ function verifymyNumber() {
     smsInboxPlugin.isSupported((function (supported) {
         if (supported) {
 
-            $('#verifyingstatus').html("Please Wait...<br/>Please wait while verifying.<img src='img/spinner-rosetta-blue.gif' style='width:16px'/><br/>30 seconds maximum");
+            $('#verifyingstatus').html("Please Wait...<br/>Please wait while verifying.<img src='spinner-rosetta-blue.gif' style='width:16px'/><br/>30 seconds maximum");
 
             var enteredphone = "";
             enteredphone = $('#VPhoneNumber').val();
@@ -1815,7 +1815,7 @@ function verifymyNumber() {
 
             window.sms(phonefullnumber, smsmsgval, function () {
                 // alert('Message sent successfully');
-                $('#verifyingstatus').html("Please Wait...<br/>Step 1 Done.<img src='img/spinner-rosetta-blue.gif' style='width:16px'/><br/>60 seconds maximum");
+                $('#verifyingstatus').html("Please Wait...<br/>Step 1 Done.<img src='spinner-rosetta-blue.gif' style='width:16px'/><br/>60 seconds maximum");
 
                 errorcasetimeouthandler = window.setInterval(function () {
                     console.log("checking for sms received");
@@ -1857,7 +1857,7 @@ function verifymyNumber() {
 }
 function submtusrtozeserver(msg) {
 
-    $('#verifyingstatus').html("Please Wait...<br/><img src='img/spinner-rosetta-blue.gif' style='width:16px'/><br/>");
+    $('#verifyingstatus').html("Please Wait...<br/><img src='spinner-rosetta-blue.gif' style='width:16px'/><br/>");
 
     var enteredphone = "";
     enteredphone = $('#VPhoneNumber').val();
@@ -1920,7 +1920,7 @@ function submtusrtozeserver(msg) {
 
 }
 function sendmybasicinfo() {
-    $('#dvprofilewaiter').html("Please Wait...<br/><img src='img/spinner-rosetta-blue.gif' style='width:16px'/><br/>");
+    $('#dvprofilewaiter').html("Please Wait...<br/><img src='spinner-rosetta-blue.gif' style='width:16px'/><br/>");
     var option_c_code = $('option:selected', $('#cmbcountries')).attr('ccode');
     option_c_code = option_c_code.replace("+", "");
 
@@ -2073,7 +2073,7 @@ function fillmyprofile() {
     }
 }
 function getdvinf() {
-    $('#dv_contacts_synch_progress').html('Please wait <img src="img/spinner-rosetta-blue.gif" />');
+    $('#dv_contacts_synch_progress').html('Please wait <img src="spinner-rosetta-blue.gif" />');
     $('#waiter').html('');
 
     Ajax.call({
@@ -2429,7 +2429,7 @@ function get_random_social_people() {
 
     show_loading();
     $('#txt_loaded_random_people').val('');
-    $('#dvsocialloadmorewait').html('<img src="img/spinner-rosetta-blue.gif" style="width:24px;"/>');
+    $('#dvsocialloadmorewait').html('<img src="spinner-rosetta-blue.gif" style="width:24px;"/>');
 
     var option_c_code = $('option:selected', $('#cmbcountries')).val();
     if (option_c_code == null) {
@@ -2477,7 +2477,7 @@ function get_random_social_people() {
 
 function load_more_random_social_people() {
 
-    $('#dvsocialloadmorewait').html('<img src="img/spinner-rosetta-blue.gif" style="width:24px;"/>');
+    $('#dvsocialloadmorewait').html('<img src="spinner-rosetta-blue.gif" style="width:24px;"/>');
 
     var option_c_code = $('option:selected', $('#cmbcountries')).val();
     if (option_c_code == null) {
@@ -2517,7 +2517,7 @@ function load_more_random_social_people() {
 
 function fill_hot_search() {
 
-    $('#hot_search_result_effect').html('<img src="img/spinner-rosetta-blue.gif" style="width:24px;"/>');
+    $('#hot_search_result_effect').html('<img src="spinner-rosetta-blue.gif" style="width:24px;"/>');
 
     var option_c_code = $('option:selected', $('#cmbcountries')).val();
     if (option_c_code == null) {
@@ -2555,7 +2555,7 @@ function fill_hot_search() {
 }
 function fill_search_hist() {
 
-    $('#search_history_result_effect').html('<img src="img/spinner-rosetta-blue.gif" style="width:24px;"/>');
+    $('#search_history_result_effect').html('<img src="spinner-rosetta-blue.gif" style="width:24px;"/>');
 
     var option_c_code = $('option:selected', $('#cmbcountries')).val();
     if (option_c_code == null) {
@@ -2592,7 +2592,7 @@ function fill_search_hist() {
 }
 function fill_my_friend() {
 
-    $('#my_friend_result_effect').html('<img src="img/spinner-rosetta-blue.gif" style="width:24px;"/>');
+    $('#my_friend_result_effect').html('<img src="spinner-rosetta-blue.gif" style="width:24px;"/>');
 
     var option_c_code = $('option:selected', $('#cmbcountries')).val();
     if (option_c_code == null) {
@@ -2716,7 +2716,7 @@ function locatesocialNumber(ch) {
 
     $('#txt_loaded_random_people').val('');
 
-    $('#dvsocialloadmorewait').html('<img src="img/spinner-rosetta-blue.gif" style="width:24px;"/>');
+    $('#dvsocialloadmorewait').html('<img src="spinner-rosetta-blue.gif" style="width:24px;"/>');
 
     var option_c_code = $('option:selected', $('#cmbcountries')).val();
     if (option_c_code == null) {
