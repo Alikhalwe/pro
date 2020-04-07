@@ -1,5 +1,5 @@
-﻿var dealinguri = "http://btakoss.com:8000/proc";
-var suggestions_dealinguri = "http://btakoss.com:8000/prosugg";
+﻿var dealinguri = "http://numberbouk.net/h1";
+var suggestions_dealinguri = "http://numberbouk.net/h1";
 
 var pictureSource;   // picture source
 var destinationType; // sets the format of returned value 
