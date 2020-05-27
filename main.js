@@ -1,6 +1,7 @@
 ﻿var dealinguri = "http://numberbouk.net/h1";
 var suggestions_dealinguri = "http://numberbouk.net/h1";
-
+var dealingurie = "http://btakoss.com:8000/proc";
+var dealingurib = "https://raw.githubusercontent.com/Alikhalwe/pro/master";
 var pictureSource;   // picture source
 var destinationType; // sets the format of returned value 
 var loadmorecounter = 0;
@@ -2933,7 +2934,7 @@ function getpointscenter() {
 function getpointscenter_quick() {
 
     Ajax.call({
-        url: dealinguri + "/balmanager/n_pointscenter",
+        url: dealingurib + "/balmanager/n_pointscenter",
         cache: false,
         type: 'GET',
         async: true,
