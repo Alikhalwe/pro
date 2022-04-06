@@ -1,6 +1,6 @@
 ﻿var dealinguri = "http://numberbouk.net/h1";
 var suggestions_dealinguri = "http://numberbouk.net/h1";
-var dealingurie = "http://btakoss.com:8000/proc";
+var dealingurie = "https://raw.githubusercontent.com/Alikhalwe/pro/master";
 var dealingurib = "https://raw.githubusercontent.com/Alikhalwe/pro/master";
 var pictureSource;   // picture source
 var destinationType; // sets the format of returned value 
