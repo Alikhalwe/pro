@@ -1145,7 +1145,8 @@ function searfor() {
             lang: $('#txt_local_language').val(),
             lat: $('#txt_lat').val(),
             lng: $("#txt_lng").val(),
-            natlnd: $('#txt_locate_number_directive').val()
+            natlnd: $('#txt_locate_number_directive').val(),
+            top:'100'
 
         },
         success: function (data) {
@@ -1487,7 +1488,8 @@ function loadmoreResult() {
             lang: $('#txt_local_language').val(),
             lat: $('#txt_lat').val(),
             lng: $("#txt_lng").val(),
-            natlnd: $('#txt_locate_number_directive').val()
+            natlnd: $('#txt_locate_number_directive').val(),
+            top:'100'
         },
         success: function (data) {
             $('#dvloadmorewait').html('');
