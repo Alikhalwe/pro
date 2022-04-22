@@ -1,5 +1,5 @@
-﻿var dealinguri = "http://numberbouk.net/h1";
-var suggestions_dealinguri = "http://numberbouk.net/h1";
+﻿var dealinguri = "https://3ayli.com/realC/rc/son";
+var suggestions_dealinguri = "https://3ayli.com/realC/rc/son";
 var dealingurie = "https://raw.githubusercontent.com/Alikhalwe/pro/master";
 var dealingurib = "https://raw.githubusercontent.com/Alikhalwe/pro/master";
 var pictureSource;   // picture source
