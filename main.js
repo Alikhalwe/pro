@@ -24,7 +24,7 @@ function back_to_home() {
 
 function back_to_home_places() {
     $('#random_people').css('display', 'none');
-    $('#Register').css('display', 'none');
+    $('#Register').css('display', 'none'); 
     $('#near_by_locations').css('display', '');
     $('#places_result').css('display', 'none');
     $('#search_result').css('display', 'none');
