@@ -955,7 +955,7 @@ function get_places_details(tps, myid) {
 
     show_loading();
     Ajax.call({
-        url: dealinguri + "/geolocations/places_new",
+        url: dealinguri + "/geolocations/places",
         cache: true,
         type: 'GET',
         async: true,
