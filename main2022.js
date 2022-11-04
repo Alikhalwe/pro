@@ -1672,6 +1672,7 @@ function loadmoreResult() {
                     var dest_user_id = $(this).attr('related_user_id');
                     var btn_clicked_button = $(this);
 
+
                     Ajax.call({
                         url: dealinguri + "/raterengine/minusonefrom",
                         cache: false,
