@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix Clone</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #141414;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .navbar {
+            background-color: #000000;
+            padding: 20px 50px;
+            position: fixed;
+            width: 100%;
+            z-index: 1;
+        }
+
+        .logo {
+            color: #E50914;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .main-content {
+            padding-top: 80px;
+        }
+
+        .section {
+            margin: 30px 50px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .row {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+        }
+
+        .card {
+            min-width: 200px;
+            height: 300px;
+            background-color: #2F2F2F;
+            border-radius: 4px;
+            transition: transform 0.3s;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .card::after {
+            content: '\f04b';
+            font-family: "Font Awesome 5 Free";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover::after {
+            opacity: 0.8;
+        }
+
+        .info {
+            padding: 10px;
+            position: absolute;
+            bottom: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            width: 100%;
+            border-radius: 0 0 4px 4px;
+        }
+
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <span class="logo">NETFLIX</span>
+    </nav>
+
+    <div class="main-content">
+        <!-- قسم الأفلام -->
+        <div class="section">
+            <h2 class="section-title">أفلام شائعة</h2>
+            <div class="row">
+                <div class="card">
+                    <img src="https://source.unsplash.com/random/200x300?movie1" alt="فيلم 1">
+                    <div class="info">
+                        <h3>اسم الفيلم 1</h3>
+                        <p>2023 | دراما</p>
+                    </div>
+                </div>
+                <!-- تكرار البطاقات للافلام -->
+                <div class="card"><img src="https://source.unsplash.com/random/200x300?movie2" alt="فيلم 2"></div>
+                <div class="card"><img src="https://source.unsplash.com/random/200x300?movie3" alt="فيلم 3"></div>
+                <div class="card"><img src="https://source.unsplash.com/random/200x300?movie4" alt="فيلم 4"></div>
+                <div class="card"><img src="https://source.unsplash.com/random/200x300?movie5" alt="فيلم 5"></div>
+            </div>
+        </div>
+
+        <!-- قسم المسلسلات -->
+        <div class="section">
+            <h2 class="section-title">مسلسلات شائعة</h2>
+            <div class="row">
+                <div class="card">
+                    <img src="https://source.unsplash.com/random/200x300?series1" alt="مسلسل 1">
+                    <div class="info">
+                        <h3>اسم المسلسل 1</h3>
+                        <p>2023 | تشويق</p>
+                    </div>
+                </div>
+                <!-- تكرار البطاقات للمسلسلات -->
+                <div class="card"><img src="https://source.unsplash.com/random/200x300?series2" alt="مسلسل 2"></div>
+                <div class="card"><img src="https://source.unsplash.com/random/200x300?series3" alt="مسلسل 3"></div>
+                <div class="card"><img src="https://source.unsplash.com/random/200x300?series4" alt="مسلسل 4"></div>
+                <div class="card"><img src="https://source.unsplash.com/random/200x300?series5" alt="مسلسل 5"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
