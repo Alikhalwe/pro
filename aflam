@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أحدث الأفلام - سينما ستريم</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #0f0f0f;
+            color: #fff;
+        }
+
+        .header {
+            background: #000;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .movie-card {
+            background: #1a1a1a;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .movie-thumbnail {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .movie-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .play-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 50px;
+            color: rgba(255,255,255,0.8);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .movie-card:hover .play-btn {
+            opacity: 1;
+        }
+
+        .movie-info {
+            padding: 15px;
+        }
+
+        .movie-title {
+            color: #e50914;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .movie-description {
+            color: #aaa;
+            font-size: 0.9em;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .trailer-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .trailer-video {
+            width: 80%;
+            max-width: 1000px;
+            height: 500px;
+            border: none;
+            border-radius: 10px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 30px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .rating {
+            color: #ffd700;
+            margin: 10px 0;
+        }
+
+        .genre {
+            display: inline-block;
+            background: #e50914;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            margin: 5px 0;
+        }
+
+        @media (max-width: 768px) {
+            .trailer-video {
+                width: 95%;
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>أحدث الأفلام 🎬</h1>
+        <p>شاهد أحدث الإصدارات السينمائية وتصفح المشاهد الحصرية</p>
+    </header>
+
+    <div class="container">
+        <div class="movies-grid" id="moviesContainer"></div>
+    </div>
+
+    <div class="trailer-container" id="trailerContainer">
+        <span class="close-btn" onclick="closeTrailer()">&times;</span>
+        <iframe class="trailer-video" id="trailerVideo" allowfullscreen></iframe>
+    </div>
+
+    <script>
+        // بيانات الأفلام (يمكن استبدالها ببيانات حقيقية من API)
+        const movies = [
+            {
+                title: "الفرسان الأخيرون",
+                image: "https://source.unsplash.com/random/800x600?action-movie",
+                description: "في عالم ما بعد الكارثة، مجموعة من المحاربين يحاولون إنقاذ الإنسانية من خطر مجهول.",
+                trailer: "https://www.youtube.com/embed/5PSNL1qE6VY",
+                rating: "★★★★☆",
+                genre: ["أكشن", "خيال علمي"]
+            },
+            {
+                title: "رحلة إلى المجهول",
+                image: "https://source.unsplash.com/random/800x600?adventure-movie",
+                description: "مغامرة مثيرة عبر الزمن بين عوالم متوازية وأسرار كونية غامضة.",
+                trailer: "https://www.youtube.com/embed/d9MyW72ELq0",
+                rating: "★★★★★",
+                genre: ["مغامرة", "فانتازيا"]
+            },
+            {
+                title: "ظل المدينة",
+                image: "https://source.unsplash.com/random/800x600?drama-movie",
+                description: "دراما إجتماعية تكشف أسرار عائلة تخفي ماضياً مظلماً تحت واجهة مثالية.",
+                trailer: "https://www.youtube.com/embed/t433PEQGErc",
+                rating: "★★★☆☆",
+                genre: ["دراما", "تشويق"]
+            }
+        ];
+
+        // توليد بطاقات الأفلام
+        function renderMovies() {
+            const container = document.getElementById('moviesContainer');
+            container.innerHTML = movies.map(movie => `
+                <div class="movie-card">
+                    <div class="movie-thumbnail" onclick="playTrailer('${movie.trailer}')">
+                        <img src="${movie.image}" alt="${movie.title}">
+                        <i class="fas fa-play play-btn"></i>
+                    </div>
+                    <div class="movie-info">
+                        <h3 class="movie-title">${movie.title}</h3>
+                        <div class="rating">${movie.rating}</div>
+                        ${movie.genre.map(g => `<span class="genre">${g}</span>`).join(' ')}
+                        <p class="movie-description">${movie.description}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // تشغيل المشاهد
+        function playTrailer(url) {
+            document.getElementById('trailerContainer').style.display = "flex";
+            document.getElementById('trailerVideo').src = url;
+        }
+
+        // إغلاق المشهد
+        function closeTrailer() {
+            document.getElementById('trailerContainer').style.display = "none";
+            document.getElementById('trailerVideo').src = "";
+        }
+
+        // التحميل الأولي
+        window.onload = renderMovies;
+    </script>
+</body>
+</html>
