@@ -108,6 +108,16 @@
     </div>
 
     <script>
+    
+    // إضافة مؤشر تحميل
+function toggleLoader(show) {
+    document.getElementById('loader').style.display = show ? 'block' : 'none';
+}
+    
+    
+    
+    
+    
     // استبدال البيانات الوهمية بطلب AJAX حقيقي
 async function fetchRealData(searchTerm, isNumberSearch) {
     const response = await fetch(`https://api.example.com/search?q=${searchTerm}`);
