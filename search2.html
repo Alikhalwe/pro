@@ -108,6 +108,12 @@
     </div>
 
     <script>
+    // استبدال البيانات الوهمية بطلب AJAX حقيقي
+async function fetchRealData(searchTerm, isNumberSearch) {
+    const response = await fetch(`https://api.example.com/search?q=${searchTerm}`);
+    return await response.json();
+}
+    
         // إغلاق القائمة المنسدلة عند النقر خارجها
         document.addEventListener('click', function(event) {
             if (!event.target.closest('.dropdown')) {
