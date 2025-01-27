@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>موقع البحث المتقدم</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #2196F3 50%, #FFEB3B 50%);
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .nav-container {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            color: white;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 5px;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-content a {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #ddd;
+        }
+
+        .search-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #2196F3;
+            border-radius: 25px;
+            outline: none;
+        }
+
+        .search-button {
+            background-color: #2196F3;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 15px;
+            float: left;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-container">
+        <div class="dropdown">
+            <span class="logo">☰ القائمة</span>
+            <div class="dropdown-content">
+                <a href="#register">التسجيل</a>
+                <a href="#location">الموقع</a>
+                <a href="#history">تسجيلات البحث</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="search-container">
+        <input 
+            type="search" 
+            class="search-box" 
+            placeholder="اكتب بحثك هنا..."
+        >
+        <button class="search-button">بحث</button>
+    </div>
+
+    <script>
+        // إغلاق القائمة المنسدلة عند النقر خارجها
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.dropdown')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].style.display = 'none';
+                }
+            }
+        });
+
+        // تبديل القائمة المنسدلة
+        document.querySelector('.dropdown').addEventListener('click', function() {
+            var content = this.querySelector('.dropdown-content');
+            content.style.display = content.style.display === 'block' ? 'none' : 'block';
+        });
+    </script>
+</body>
+</html>
