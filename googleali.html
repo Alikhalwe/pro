@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Google</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(to bottom, #FFD700 30%, #4285F4 70%);
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .logo {
+            width: 272px;
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 584px;
+            background: white;
+            border-radius: 24px;
+            padding: 10px 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            padding: 10px;
+            background: transparent;
+        }
+
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-btn {
+            background: #4285F4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .lucky-btn {
+            background: #FFD700;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .search-icon {
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .search-box {
+                width: 90%;
+            }
+            .logo {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google Logo" class="logo">
+        
+        <div class="search-box">
+            <svg class="search-icon" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <input type="text" class="search-input" placeholder="ابحث في Google أو أدخل عنوان URL">
+        </div>
+
+        <div class="buttons">
+            <button class="search-btn">بحث Google</button>
+            <button class="lucky-btn">أنا محظوظ</button>
+        </div>
+    </div>
+</body>
+</html>
