@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>محرك بحث مخصص</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+            direction: rtl;
+        }
+        #searchBox {
+            width: 500px;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 24px;
+            margin: 20px;
+        }
+        #suggestions {
+            width: 524px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            display: none;
+        }
+        .suggestion-item {
+            padding: 10px;
+            cursor: pointer;
+            text-align: right;
+        }
+        .suggestion-item:hover {
+            background-color: #f5f5f5;
+        }
+        #searchEngine {
+            padding: 8px;
+            margin: 10px;
+            width: 200px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <select id="searchEngine">
+        <option value="https://www.google.com/search?q=">Google</option>
+        <option value="https://yandex.com/search/?text=">Yandex</option>
+        <option value="">محرك بحث آخر</option>
+    </select>
+
+    <input type="text" id="searchBox" placeholder="ابحث عن أي شيء..." autocomplete="off">
+    <div id="suggestions"></div>
+    <button onclick="performSearch()">ابحث</button>
+
+    <script>
+        // قائمة الكلمات المقترحة
+        const suggestions = [
+            "أخبار",
+            "طقس",
+            "خرائط",
+            "فيديو",
+            "صور",
+            "رياضة",
+            "بريد إلكتروني",
+            "تسوق"
+        ];
+
+        const searchBox = document.getElementById('searchBox');
+        const suggestionsDiv = document.getElementById('suggestions');
+
+        searchBox.addEventListener('input', function(e) {
+            const input = e.target.value.toLowerCase();
+            const filtered = suggestions.filter(word => 
+                word.toLowerCase().includes(input)
+            );
+            
+            if (input && filtered.length) {
+                suggestionsDiv.innerHTML = filtered.map(word => 
+                    `<div class="suggestion-item">${word}</div>`
+                ).join('');
+                suggestionsDiv.style.display = 'block';
+            } else {
+                suggestionsDiv.style.display = 'none';
+            }
+        });
+
+        // اختيار اقتراح
+        suggestionsDiv.addEventListener('click', function(e) {
+            if (e.target.classList.contains('suggestion-item')) {
+                searchBox.value = e.target.textContent;
+                suggestionsDiv.style.display = 'none';
+            }
+        });
+
+        // تنفيذ البحث
+        function performSearch() {
+            const engine = document.getElementById('searchEngine').value;
+            const query = encodeURIComponent(searchBox.value);
+            
+            if (engine) {
+                window.open(engine + query, '_blank');
+            } else {
+                const customEngine = prompt("أدخل عنوان URL لمحرك البحث (مثال: https://example.com/search?q=):");
+                if (customEngine) {
+                    window.open(customEngine + query, '_blank');
+                }
+            }
+        }
+
+        // إخفاء الاقتراحات عند النقر خارجها
+        document.addEventListener('click', function(e) {
+            if (e.target.id !== 'searchBox') {
+                suggestionsDiv.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
