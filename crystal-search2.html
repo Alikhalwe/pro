@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>CRYSTAL SEARCH</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+            background: #f0f2f5;
+        }
+        
+        .logo {
+            font-size: 48px;
+            color: #4285f4;
+            margin-bottom: 30px;
+        }
+        
+        .search-box {
+            width: 600px;
+            padding: 14px;
+            font-size: 16px;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px;
+            margin: 20px auto;
+        }
+        
+        .engine-select {
+            padding: 10px;
+            margin: 10px;
+            border-radius: 8px;
+            border: 1px solid #dfe1e5;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo">🔍 CRYSTAL SEARCH</div>
+    
+    <form id="searchForm" action="https://www.google.com/search" method="GET">
+        <input list="suggestions" 
+               class="search-box" 
+               type="text" 
+               name="q" 
+               placeholder="ابحث عن أي شيء..."
+               autocomplete="off">
+        
+        <datalist id="suggestions">
+            <option value="البرمجة"></option>
+            <option value="أخبار التكنولوجيا"></option>
+            <option value="تعلم اللغة الإنجليزية"></option>
+            <option value="أفضل المطاعم"></option>
+            <option value="الطقس اليوم"></option>
+        </datalist>
+        
+        <select class="engine-select" id="engineSelect">
+            <option value="https://www.google.com/search">Google</option>
+            <option value="https://yandex.com/search/">Yandex</option>
+            <option value="">اختياري (أدخل الرابط)</option>
+        </select>
+        
+        <br>
+        <input type="submit" value="بحث">
+    </form>
+
+    <script>
+        const engineSelect = document.getElementById('engineSelect');
+        const searchForm = document.getElementById('searchForm');
+
+        // تغيير محرك البحث عند التحديد
+        engineSelect.addEventListener('change', function() {
+            if(this.value === "") {
+                const customEngine = prompt("الرجاء إدخال رابط محرك البحث الخاص بك (مثال: https://example.com/search?q=)");
+                if(customEngine) {
+                    searchForm.action = customEngine;
+                }
+            } else {
+                searchForm.action = this.value;
+            }
+        });
+
+        // إكمال تلقائي ديناميكي
+        const searchInput = document.querySelector('input[name="q"]');
+        searchInput.addEventListener('input', async function(e) {
+            // هنا يمكنك إضافة اتصال بخدمة اقتراحات البحث (مثل Google Suggest API)
+        });
+    </script>
+</body>
+</html>
