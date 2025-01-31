@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>CRYSTAL SEARCH</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .search-container {
+            width: 90%;
+            max-width: 600px;
+            margin-top: 100px;
+        }
+
+        .search-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #searchInput {
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #4a4a4a;
+            border-radius: 25px;
+            background: #2d2d2d;
+            color: white;
+            width: 100%;
+        }
+
+        #searchEngine {
+            padding: 10px;
+            border-radius: 15px;
+            background: #2d2d2d;
+            color: white;
+            border: 1px solid #4a4a4a;
+        }
+
+        button {
+            padding: 12px 25px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .autocomplete-items {
+            border: 1px solid #4a4a4a;
+            border-radius: 15px;
+            margin-top: 5px;
+            background: #2d2d2d;
+            display: none;
+        }
+
+        .autocomplete-item {
+            padding: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .autocomplete-item:hover {
+            background: #3d3d3d;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            text-align: center;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <form id="searchForm" class="search-box">
+            <select id="searchEngine">
+                <option value="https://www.google.com/search?q=">Google</option>
+                <option value="https://yandex.com/search/?text=">Yandex</option>
+                <option value="">موقع مخصص</option>
+            </select>
+            
+            <input type="text" id="searchInput" placeholder="ابحث عن أي شيء...">
+            <div id="autocompleteList" class="autocomplete-items"></div>
+            <button type="submit">ابحث</button>
+        </form>
+    </div>
+
+    <footer>
+        © 2024 جميع الحقوق محفوظة لـ Crystal Ali
+    </footer>
+
+    <script>
+        const searchEngines = [
+            "البرمجة",
+            "التصميم الجرافيكي",
+            "التعلم الآلي",
+            "أخبار التكنولوجيا",
+            "برامج مفتوحة المصدر",
+            "تطوير الويب"
+        ];
+
+        const searchInput = document.getElementById('searchInput');
+        const autocompleteList = document.getElementById('autocompleteList');
+
+        searchInput.addEventListener('input', function(e) {
+            const input = e.target.value.toLowerCase();
+            autocompleteList.innerHTML = '';
+            
+            if (input.length > 0) {
+                const filtered = searchEngines.filter(item => 
+                    item.toLowerCase().includes(input)
+                );
+                
+                filtered.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'autocomplete-item';
+                    div.textContent = item;
+                    div.onclick = () => {
+                        searchInput.value = item;
+                        autocompleteList.style.display = 'none';
+                    };
+                    autocompleteList.appendChild(div);
+                });
+                
+                autocompleteList.style.display = 'block';
+            } else {
+                autocompleteList.style.display = 'none';
+            }
+        });
+
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const engine = document.getElementById('searchEngine').value;
+            const query = searchInput.value;
+            
+            let searchURL;
+            if (engine === '') {
+                const customEngine = prompt('الرجاء إدخال عنوان URL للبحث (استخدم %s مكان مصطلح البحث):');
+                searchURL = customEngine ? customEngine.replace('%s', encodeURIComponent(query)) : '#';
+            } else {
+                searchURL = engine + encodeURIComponent(query);
+            }
+            
+            window.open(searchURL, '_blank');
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target.id !== 'searchInput') {
+                autocompleteList.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
