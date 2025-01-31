@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>CRYSTAL SEARCH</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .search-box {
+            width: 600px;
+            max-width: 90%;
+            margin: 20px auto;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #444;
+            border-radius: 30px;
+            background-color: #333;
+            color: white;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        #searchInput:hover, #searchInput:focus {
+            border-color: #666;
+            box-shadow: 0 0 10px rgba(100, 100, 100, 0.3);
+        }
+
+        #searchEngine {
+            width: 200px;
+            padding: 10px;
+            margin: 10px;
+            background-color: #333;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 12px 30px;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background-color: #555;
+            transform: scale(1.05);
+        }
+
+        .copyright {
+            position: fixed;
+            bottom: 20px;
+            color: #666;
+        }
+
+        #autocompleteList {
+            width: 600px;
+            max-width: 90%;
+            margin: 0 auto;
+            background-color: #333;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .autocomplete-item {
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .autocomplete-item:hover {
+            background-color: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CRYSTAL SEARCH</h1>
+        
+        <select id="searchEngine">
+            <option value="https://www.google.com/search?q=">Google</option>
+            <option value="https://yandex.com/search/?text=">Yandex</option>
+            <option value="">محرك بحث مخصص</option>
+        </select>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="ابحث عن أي شيء..." list="autocomplete">
+            <datalist id="autocomplete">
+                <option value="أخبار اليوم">
+                <option value="أفضل أفلام 2023">
+                <option value="توقعات الطقس">
+                <option value="أحدث التقنيات">
+                <option value="نصائح صحية">
+            </datalist>
+            <button onclick="performSearch()">بحث</button>
+        </div>
+    </div>
+
+    <div class="copyright">
+        حقوق الملكية © 2023 Crystal Ali
+    </div>
+
+    <script>
+        function performSearch() {
+            const query = document.getElementById('searchInput').value;
+            const engine = document.getElementById('searchEngine').value;
+            
+            if (engine === "") {
+                const customEngine = prompt("الرجاء إدخال رابط محرك البحث المخصص (مثال: https://example.com/search?q=):");
+                if (customEngine) {
+                    window.open(customEngine + encodeURIComponent(query), '_blank');
+                }
+            } else {
+                window.open(engine + encodeURIComponent(query), '_blank');
+            }
+        }
+
+        // تفعيل البحث عند الضغط على Enter
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>
