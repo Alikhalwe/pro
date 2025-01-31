@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRYSTAL SEARCH</title>
+    <style>
+        /* تنسيق عام للصفحة */
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* تنسيق القائمة المنسدلة */
+        .dropdown {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        select {
+            background: #333;
+            color: white;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #555;
+        }
+
+        /* تنسيق منطقة البحث */
+        .search-container {
+            margin-top: 15vh;
+            text-align: center;
+        }
+
+        /* تنسيق حقل البحث */
+        #searchInput {
+            width: 600px;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #444;
+            border-radius: 25px;
+            background: #333;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        /* تنسيق نتائج الإكمال التلقائي */
+        #autocompleteResults {
+            width: 600px;
+            margin: 0 auto;
+            background: #333;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .autocomplete-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #444;
+        }
+
+        .autocomplete-item:hover {
+            background-color: #444;
+        }
+
+        /* تنسيق حقوق الملكية */
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+            background: #1a1a1a;
+        }
+    </style>
+</head>
+<body>
+    <!-- القائمة المنسدلة -->
+    <div class="dropdown">
+        <select id="engineSelect">
+            <option value="https://yandex.com/search/?text=">Yandex</option>
+            <option value="https://www.google.com/search?q=">Google</option>
+            <option value="https://www.startpage.com/search?q=">Startpage</option>
+            <option value="">اختياري</option>
+        </select>
+    </div>
+
+    <!-- منطقة البحث الرئيسية -->
+    <div class="search-container">
+        <h1>CRYSTAL SEARCH</h1>
+        <form id="searchForm" action="#" method="GET">
+            <input type="text" id="searchInput" placeholder="ابحث عن أي شيء..." autocomplete="off">
+            <div id="autocompleteResults"></div>
+        </form>
+    </div>
+
+    <!-- حقوق الملكية -->
+    <footer>
+        &copy; 2024 Crystal Ali. جميع الحقوق محفوظة
+    </footer>
+
+    <script>
+        // قائمة اقتراحات الإكمال التلقائي
+        const suggestions = [
+            'الطقس اليوم',
+            'أخبار التكنولوجيا',
+            'أفضل أفلام 2024',
+            'تعليم البرمجة',
+            'وصفات صحية',
+            'أحدث الألعاب',
+            'سيارات كهربائية',
+            'السفر إلى دبي'
+        ];
+
+        const searchInput = document.getElementById('searchInput');
+        const autocompleteResults = document.getElementById('autocompleteResults');
+        const engineSelect = document.getElementById('engineSelect');
+        const searchForm = document.getElementById('searchForm');
+
+        // حدث الإدخال للبحث
+        searchInput.addEventListener('input', function() {
+            const input = this.value.toLowerCase();
+            if (input.length === 0) {
+                autocompleteResults.style.display = 'none';
+                return;
+            }
+
+            const filtered = suggestions.filter(item => 
+                item.toLowerCase().includes(input)
+            );
+
+            showAutocomplete(filtered);
+        });
+
+        // عرض الاقتراحات
+        function showAutocomplete(items) {
+            autocompleteResults.innerHTML = '';
+            if (items.length > 0) {
+                autocompleteResults.style.display = 'block';
+                items.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'autocomplete-item';
+                    div.textContent = item;
+                    div.addEventListener('click', () => {
+                        searchInput.value = item;
+                        autocompleteResults.style.display = 'none';
+                    });
+                    autocompleteResults.appendChild(div);
+                });
+            } else {
+                autocompleteResults.style.display = 'none';
+            }
+        }
+
+        // إرسال النموذج
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const query = encodeURIComponent(searchInput.value);
+            const engine = engineSelect.value;
+
+            let url;
+            if (engine === '') {
+                url = `?query=${query}`; // يمكنك تعديل هذا الجزء
+            } else {
+                url = engine + query;
+            }
+
+            window.location.href = url;
+        });
+
+        // إخفاء الاقتراحات عند النقر خارجها
+        document.addEventListener('click', function(e) {
+            if (!autocompleteResults.contains(e.target) && e.target !== searchInput) {
+                autocompleteResults.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
