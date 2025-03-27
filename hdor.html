@@ -1,0 +1,150 @@
+<html lang="ar" dir="rtl"><head>
+    <meta charset="UTF-8">
+    <title>نظام الحضور والانصراف</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .btn-checkin {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-checkout {
+            background-color: #dc3545;
+            color: white;
+        }
+        table {
+            margin-top: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>نظام تسجيل الحضور والانصراف</h1>
+         
+        <div class="input-group mb-3">
+            <input type="text" id="employeeName" class="form-control" placeholder="أدخل اسم الموظف">
+            <button class="btn btn-checkin" onclick="checkIn()">تسجيل الحضور</button>
+            <button class="btn btn-checkout" onclick="checkOut()">تسجيل الانصراف</button>
+        </div>
+ 
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>الاسم</th>
+                    <th>وقت الحضور</th>
+                    <th>وقت الانصراف</th>
+                    <th>الحالة</th>
+                </tr>
+            </thead>
+            <tbody id="attendanceTable">
+                    <tr>
+                        <td>علي</td>
+                        <td>22‏/3‏/2025، 4:27:35 ص</td>
+                        <td>22‏/3‏/2025، 4:27:50 ص</td>
+                        <td style="color: red">
+                            منصرف
+                        </td>
+                    </tr>
+                 
+                    <tr>
+                        <td>يحي</td>
+                        <td>22‏/3‏/2025، 4:28:11 ص</td>
+                        <td>-</td>
+                        <td style="color: green">
+                            حاضر
+                        </td>
+                    </tr>
+                 
+                    <tr>
+                        <td>حسن</td>
+                        <td>22‏/3‏/2025، 7:23:27 ص</td>
+                        <td>22‏/3‏/2025، 7:23:55 ص</td>
+                        <td style="color: red">
+                            منصرف
+                        </td>
+                    </tr>
+                 
+                    <tr>
+                        <td>علي</td>
+                        <td>22‏/3‏/2025، 7:23:43 ص</td>
+                        <td>-</td>
+                        <td style="color: green">
+                            حاضر
+                        </td>
+                    </tr>
+                </tbody>
+        </table>
+    </div>
+ 
+    <script>
+        let attendanceData = JSON.parse(localStorage.getItem('attendance')) || [];
+ 
+        function updateTable() {
+            const tbody = document.getElementById('attendanceTable');
+            tbody.innerHTML = '';
+             
+            attendanceData.forEach((record, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${record.name}</td>
+                        <td>${record.checkIn || '-'}</td>
+                        <td>${record.checkOut || '-'}</td>
+                        <td style="color: ${record.status === 'present' ? 'green' : 'red'}">
+                            ${record.status === 'present' ? 'حاضر' : 'منصرف'}
+                        </td>
+                    </tr>
+                `;
+            });
+             
+            localStorage.setItem('attendance', JSON.stringify(attendanceData));
+        }
+ 
+        function checkIn() {
+            const name = document.getElementById('employeeName').value;
+            if (!name) return alert('الرجاء إدخال اسم الموظف');
+             
+            const existing = attendanceData.find(r => r.name === name && !r.checkOut);
+            if (existing) return alert('هذا الموظف مسجل حضور بالفعل!');
+ 
+            const newRecord = {
+                name: name,
+                checkIn: new Date().toLocaleString(),
+                status: 'present'
+            };
+             
+            attendanceData.push(newRecord);
+            updateTable();
+            document.getElementById('employeeName').value = '';
+        }
+ 
+        function checkOut() {
+            const name = document.getElementById('employeeName').value;
+            if (!name) return alert('الرجاء إدخال اسم الموظف');
+             
+            const record = attendanceData.find(r => r.name === name && !r.checkOut);
+            if (!record) return alert('هذا الموظف ليس مسجل حضور!');
+             
+            record.checkOut = new Date().toLocaleString();
+            record.status = 'left';
+            updateTable();
+            document.getElementById('employeeName').value = '';
+        }
+ 
+        // تحميل البيانات عند بدء التشغيل
+        updateTable();
+    </script>
+ 
+</body></html>
