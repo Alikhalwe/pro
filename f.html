@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crystal Lookup Pro</title>
+  <meta name="description" content="ابحث عن الأرقام والأسماء السعودية بسهولة مع Crystal Lookup.">
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/483/483947.png">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0066cc;
+      --accent: #0095ff;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --background-light: #f8fafc;
+      --surface-light: #ffffff;
+      --text-light: #1e293b;
+      --text-muted-light: #64748b;
+      --background-dark: #0f172a;
+      --surface-dark: #1e293b;
+      --text-dark: #f1f5f9;
+      --text-muted-dark: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--background-light);
+      color: var(--text-light);
+      transition: background-color 0.4s, color 0.4s;
+      line-height: 1.6;
+    }
+
+    body.dark {
+      background-color: var(--background-dark);
+      color: var(--text-dark);
+    }
+
+    header {
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      color: white;
+      padding: 1.2rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    main {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 1.5rem;
+      border-radius: 12px;
+      background: var(--surface-light);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      transition: background 0.4s;
+    }
+
+    body.dark main {
+      background: var(--surface-dark);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text-light);
+    }
+
+    body.dark label {
+      color: var(--text-dark);
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 1rem;
+      outline: none;
+      transition: border 0.3s, box-shadow 0.3s;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 119, 255, 0.2);
+    }
+
+    body.dark input[type="text"] {
+      background: var(--background-dark);
+      border-color: #475569;
+      color: var(--text-dark);
+    }
+
+    .help-text {
+      display: block;
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-muted-light);
+    }
+
+    body.dark .help-text {
+      color: var(--text-muted-dark);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary);
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 600;
+    }
+
+    button:hover {
+      background: var(--accent);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    #results {
+      margin-top: 1.5rem;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .card {
+      background: var(--surface-light);
+      border-radius: 10px;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.2s, box-shadow 0.2s;
+      border-left: 4px solid var(--primary);
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    body.dark .card {
+      background: rgba(30, 41, 59, 0.8);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+
+    .card p {
+      margin: 0.5rem 0;
+    }
+
+    .result-item {
+      padding: 0.75rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    body.dark .result-item {
+      border-bottom-color: #334155;
+    }
+
+    .result-item:last-child {
+      border-bottom: none;
+    }
+
+    .result-key {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .result-value {
+      color: var(--text-light);
+      text-align: left;
+      max-width: 60%;
+      word-break: break-word;
+    }
+
+    body.dark .result-value {
+      color: var(--text-dark);
+    }
+
+    #loader {
+      display: none;
+      text-align: center;
+      margin: 1.5rem 0;
+    }
+
+    .loader-content {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .loader-content div {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--primary);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .loader-content p {
+      margin: 0;
+      color: var(--text-muted-light);
+    }
+
+    body.dark .loader-content p {
+      color: var(--text-muted-dark);
+    }
+
+    .progress-container {
+      width: 100%;
+      height: 6px;
+      background-color: #e2e8f0;
+      border-radius: 3px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    body.dark .progress-container {
+      background-color: #334155;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 3px;
+      width: 0%;
+      animation: progress 30s linear forwards;
+    }
+
+    @keyframes progress {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      cursor: pointer;
+      font-size: 18px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: background 0.3s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .theme-toggle:hover {
+      background: var(--accent);
+      transform: scale(1.05);
+    }
+
+    .theme-toggle:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    .notification {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .notification.error {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+      border-right: 4px solid var(--error);
+    }
+
+    .notification.success {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border-right: 4px solid var(--success);
+    }
+
+    .notification.info {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--primary);
+      border-right: 4px solid var(--primary);
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e2e8f0;
+      font-size: 0.875rem;
+      color: var(--text-muted-light);
+    }
+
+    body.dark .stats {
+      border-top-color: #334155;
+      color: var(--text-muted-dark);
+    }
+
+    .raw-data {
+      background: var(--surface-light);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      border: 1px solid #e2e8f0;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    body.dark .raw-data {
+      background: var(--surface-dark);
+      border-color: #334155;
+    }
+
+    .raw-data pre {
+      margin: 0;
+      font-size: 0.8rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .search-type {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .search-type button {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid transparent;
+      background: #f1f5f9;
+      color: var(--text-light);
+      transition: all 0.3s;
+    }
+
+    body.dark .search-type button {
+      background: #334155;
+      color: var(--text-dark);
+    }
+
+    .search-type button.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: white;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 600px) {
+      main { 
+        margin: 1rem; 
+        padding: 1.2rem; 
+      }
+      header { 
+        font-size: 1.2rem; 
+        padding: 1rem;
+      }
+      .theme-toggle {
+        top: 10px;
+        left: 10px;
+        width: 40px;
+        height: 40px;
+      }
+      .result-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+      .result-value {
+        max-width: 100%;
+        text-align: right;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>🔍 Crystal Lookup Pro</header>
+  <button class="theme-toggle" id="themeBtn" aria-label="تبديل وضع السطوع">🌙</button>
+
+  <main>
+    <h1 class="sr-only">Crystal Lookup - البحث عن الأرقام والأسماء السعودية</h1>
+    
+    <div class="form-group">
+      <label for="searchInput">ابحث عن أي شيء</label>
+      <input type="text" id="searchInput" placeholder="أدخل رقم هاتف، اسم، أو أي بيانات للبحث..." aria-describedby="helpText">
+      <small id="helpText" class="help-text">يمكنك البحث بأرقام الهواتف، الأسماء، أو أي معلومات أخرى</small>
+    </div>
+    
+    <button id="searchBtn">بحث الآن</button>
+    
+    <div id="loader">
+      <div class="loader-content">
+        <div></div>
+        <p id="loaderText">جاري البحث في قاعدة البيانات...</p>
+        <div class="progress-container">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <p id="timeRemaining" style="font-size: 0.8rem; margin-top: 5px;">الوقت المتبقي: 30 ثانية</p>
+      </div>
+    </div>
+    
+    <div id="results"></div>
+    
+    <div class="stats">
+      <span id="searchCount">عدد عمليات البحث: 0</span>
+      <span id="lastSearch">آخر بحث: -</span>
+    </div>
+  </main>
+
+  <script>
+    // ✅ إدارة الحالة والتكوين
+    const config = {
+      apiBase: 'https://numberbouk.net/h1/search/s',
+      requestTimeout: 30000, // 30 ثانية
+      maxSearches: 100
+    };
+
+    // ✅ حالة التطبيق
+    const state = {
+      searchHistory: JSON.parse(localStorage.getItem('searchHistory')) || [],
+      theme: localStorage.getItem('theme') || 'light',
+      currentTimeout: null,
+      timeRemaining: config.requestTimeout / 1000
+    };
+
+    // ✅ عناصر DOM
+    const elements = {
+      body: document.body,
+      themeBtn: document.getElementById('themeBtn'),
+      searchBtn: document.getElementById('searchBtn'),
+      searchInput: document.getElementById('searchInput'),
+      loader: document.getElementById('loader'),
+      loaderText: document.getElementById('loaderText'),
+      progressBar: document.getElementById('progressBar'),
+      timeRemaining: document.getElementById('timeRemaining'),
+      results: document.getElementById('results'),
+      searchCount: document.getElementById('searchCount'),
+      lastSearch: document.getElementById('lastSearch')
+    };
+
+    // ✅ تهيئة التطبيق
+    function initApp() {
+      if (state.theme === 'dark') {
+        elements.body.classList.add('dark');
+        elements.themeBtn.textContent = '☀️';
+      }
+      
+      updateStats();
+      setupEventListeners();
+    }
+
+    // ✅ إعداد مستمعي الأحداث
+    function setupEventListeners() {
+      elements.themeBtn.addEventListener('click', toggleTheme);
+      elements.searchBtn.addEventListener('click', performSearch);
+      elements.searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          performSearch();
+        }
+      });
+    }
+
+    // ✅ تبديل السمة
+    function toggleTheme() {
+      elements.body.classList.toggle('dark');
+      const theme = elements.body.classList.contains('dark') ? 'dark' : 'light';
+      localStorage.setItem('theme', theme);
+      elements.themeBtn.textContent = elements.body.classList.contains('dark') ? '☀️' : '🌙';
+      elements.themeBtn.setAttribute('aria-label', 
+        elements.body.classList.contains('dark') ? 'تفعيل الوضع الفاتح' : 'تفعيل الوضع الداكن');
+    }
+
+    // ✅ بناء رابط API
+    function buildApiUrl(searchTerm) {
+      const baseParams = {
+        devuid: 'a3278667aa656728',
+        vers: '8',
+        machname: '',
+        AppName: 'com.headiosgroup.procaller',
+        dvuniqueuserid: '1',
+        platform: 'Android',
+        searchsourceofnative: '',
+        forcdedec: 'y',
+        fcntry: '966',
+        lang: 'ar-SA',
+        lat: '',
+        lng: '',
+        top: '1000',
+        dir: 'rtl'
+      };
+      
+      const params = new URLSearchParams({
+        nid: searchTerm,
+        ...baseParams
+      });
+      
+      return `${config.apiBase}?${params.toString()}`;
+    }
+
+    // ✅ تحديث مؤشر التقدم
+    function updateProgressTimer() {
+      if (state.timeRemaining > 0) {
+        state.timeRemaining--;
+        elements.timeRemaining.textContent = `الوقت المتبقي: ${state.timeRemaining} ثانية`;
+        
+        if (state.timeRemaining < 25) {
+          elements.loaderText.textContent = 'جاري البحث في قاعدة البيانات...';
+        }
+        if (state.timeRemaining < 20) {
+          elements.loaderText.textContent = 'لا يزال البحث جارياً...';
+        }
+        if (state.timeRemaining < 15) {
+          elements.loaderText.textContent = 'جاري معالجة البيانات...';
+        }
+        if (state.timeRemaining < 10) {
+          elements.loaderText.textContent = 'تقريباً انتهى البحث...';
+        }
+        if (state.timeRemaining < 5) {
+          elements.loaderText.textContent = 'جاري تحميل النتائج...';
+        }
+      }
+    }
+
+    // ✅ تنفيذ البحث
+    async function performSearch() {
+      const searchTerm = elements.searchInput.value.trim();
+      
+      if (!searchTerm) {
+        showNotification('❌ يرجى إدخال نص للبحث', 'error');
+        return;
+      }
+      
+      elements.results.innerHTML = '';
+      state.timeRemaining = config.requestTimeout / 1000;
+      elements.timeRemaining.textContent = `الوقت المتبقي: ${state.timeRemaining} ثانية`;
+      
+      showLoader();
+      
+      try {
+        const controller = new AbortController();
+        const progressInterval = setInterval(updateProgressTimer, 1000);
+        
+        state.currentTimeout = setTimeout(() => {
+          controller.abort();
+          clearInterval(progressInterval);
+        }, config.requestTimeout);
+        
+        const apiUrl = buildApiUrl(searchTerm);
+        
+        console.log('طلب API إلى:', apiUrl);
+        
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          signal: controller.signal
+        });
+        
+        clearTimeout(state.currentTimeout);
+        clearInterval(progressInterval);
+        
+        if (!response.ok) {
+          throw new Error(`خطأ في الخادم: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        hideLoader();
+        displayResults(data, searchTerm);
+        updateSearchHistory(searchTerm);
+        
+      } catch (error) {
+        clearTimeout(state.currentTimeout);
+        hideLoader();
+        
+        if (error.name === 'AbortError') {
+          showNotification('⏰ تجاوز الوقت المحدد للاتصال بالخادم (30 ثانية)', 'error');
+        } else {
+          showNotification('⚠️ حدث خطأ أثناء الاتصال بالخادم', 'error');
+          console.error('Search error:', error);
+        }
+      }
+    }
+
+    // ✅ عرض النتائج
+    function displayResults(data, searchTerm) {
+      if (!data) {
+        elements.results.innerHTML = `
+          <div class="card">
+            <h3>🔍 لم يتم العثور على نتائج</h3>
+            <p>لم نتمكن من العثور على نتائج للبحث: <strong>${searchTerm}</strong></p>
+          </div>
+        `;
+        return;
+      }
+
+      let resultsHTML = '';
+      
+      // إذا كانت البيانات تحتوي على معلومات مفيدة
+      if (data.result || data.name || data.n) {
+        const result = data.result || data;
+        resultsHTML = `
+          <div class="card">
+            <h3>✅ تم العثور على نتائج</h3>
+            <p><strong>عبارة البحث:</strong> ${searchTerm}</p>
+        `;
+        
+        // إضافة الحقول الرئيسية
+        if (result.name || data.name) {
+          resultsHTML += `<div class="result-item">
+            <span class="result-key">الاسم:</span>
+            <span class="result-value">${result.name || data.name}</span>
+          </div>`;
+        }
+        
+        if (result.n || data.n) {
+          resultsHTML += `<div class="result-item">
+            <span class="result-key">الاسم المختصر:</span>
+            <span class="result-value">${result.n || data.n}</span>
+          </div>`;
+        }
+        
+        if (result.country || data.country) {
+          resultsHTML += `<div class="result-item">
+            <span class="result-key">الدولة:</span>
+            <span class="result-value">${result.country || data.country}</span>
+          </div>`;
+        }
+        
+        if (result.type || data.type) {
+          resultsHTML += `<div class="result-item">
+            <span class="result-key">النوع:</span>
+            <span class="result-value">${result.type || data.type}</span>
+          </div>`;
+        }
+        
+        if (result.note || data.note) {
+          resultsHTML += `<div class="result-item">
+            <span class="result-key">ملاحظات:</span>
+            <span class="result-value">${result.note || data.note}</span>
+          </div>`;
+        }
+        
+        resultsHTML += `</div>`;
+        
+      } else if (Array.isArray(data) && data.length > 0) {
+        // إذا كانت البيانات عبارة عن مصفوفة
+        resultsHTML = `<div class="card">
+          <h3>📋 تم العثور على ${data.length} نتيجة</h3>
+          <p><strong>عبارة البحث:</strong> ${searchTerm}</p>`;
+        
+        data.forEach((item, index) => {
+          resultsHTML += `<div class="result-item">
+            <span class="result-key">نتيجة ${index + 1}:</span>
+            <span class="result-value">${JSON.stringify(item)}</span>
+          </div>`;
+        });
+        
+        resultsHTML += `</div>`;
+      } else {
+        // عرض جميع البيانات الخام إذا لم تكن في الهيكل المتوقع
+        resultsHTML = `
+          <div class="card">
+            <h3>📊 نتائج البحث</h3>
+            <p><strong>عبارة البحث:</strong> ${searchTerm}</p>
+            <div class="raw-data">
+              <h4>البيانات الخام:</h4>
+              <pre>${JSON.stringify(data, null, 2)}</pre>
+            </div>
+          </div>
+        `;
+      }
+      
+      elements.results.innerHTML = resultsHTML;
+      showNotification('✅ تم العثور على نتائج البحث بنجاح', 'success');
+    }
+
+    // ✅ عرض الإشعارات
+    function showNotification(message, type = 'info') {
+      const existingNotification = document.querySelector('.notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+      
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      notification.setAttribute('role', 'alert');
+      notification.setAttribute('aria-live', 'polite');
+      
+      elements.results.parentNode.insertBefore(notification, elements.results);
+      
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.remove();
+        }
+      }, 5000);
+    }
+
+    // ✅ عرض مؤشر التحميل
+    function showLoader() {
+      elements.loader.style.display = 'block';
+      elements.searchBtn.disabled = true;
+      elements.searchBtn.textContent = 'جاري البحث...';
+      elements.progressBar.style.animation = 'progress 30s linear forwards';
+      elements.loaderText.textContent = 'جاري البحث في قاعدة البيانات...';
+    }
+
+    // ✅ إخفاء مؤشر التحميل
+    function hideLoader() {
+      elements.loader.style.display = 'none';
+      elements.searchBtn.disabled = false;
+      elements.searchBtn.textContent = 'بحث الآن';
+      elements.progressBar.style.animation = 'none';
+    }
+
+    // ✅ تحديث سجل البحث
+    function updateSearchHistory(searchTerm) {
+      const searchRecord = {
+        term: searchTerm,
+        timestamp: new Date().toISOString(),
+        date: new Date().toLocaleString('ar-SA')
+      };
+      
+      state.searchHistory.unshift(searchRecord);
+      
+      if (state.searchHistory.length > config.maxSearches) {
+        state.searchHistory = state.searchHistory.slice(0, config.maxSearches);
+      }
+      
+      localStorage.setItem('searchHistory', JSON.stringify(state.searchHistory));
+      updateStats();
+    }
+
+    // ✅ تحديث الإحصائيات
+    function updateStats() {
+      elements.searchCount.textContent = `عدد عمليات البحث: ${state.searchHistory.length}`;
+      
+      if (state.searchHistory.length > 0) {
+        const lastSearch = state.searchHistory[0];
+        elements.lastSearch.textContent = `آخر بحث: ${lastSearch.term}`;
+      }
+    }
+
+    // ✅ بدء التطبيق
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+
+</body>
+</html>
