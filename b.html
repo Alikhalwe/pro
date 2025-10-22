@@ -6,15 +6,26 @@
   <title>Crystal Number Lookup Pro</title>
   <meta name="description" content="ابحث عن الأرقام السعودية بسهولة مع Crystal Lookup.">
   <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/483/483947.png">
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #0078ff;
-      --accent: #00c4ff;
-      --background-light: #f5f7fa;
+      --primary: #0066cc;
+      --accent: #0095ff;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --background-light: #f8fafc;
+      --surface-light: #ffffff;
       --text-light: #1e293b;
+      --text-muted-light: #64748b;
       --background-dark: #0f172a;
-      --text-dark: #e2e8f0;
+      --surface-dark: #1e293b;
+      --text-dark: #f1f5f9;
+      --text-muted-dark: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
@@ -24,6 +35,7 @@
       background-color: var(--background-light);
       color: var(--text-light);
       transition: background-color 0.4s, color 0.4s;
+      line-height: 1.6;
     }
 
     body.dark {
@@ -39,36 +51,69 @@
       font-size: 1.5rem;
       font-weight: bold;
       letter-spacing: 1px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
-    .container {
+    main {
       max-width: 500px;
       margin: 2rem auto;
       padding: 1.5rem;
       border-radius: 12px;
-      background: rgba(255,255,255,0.8);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      background: var(--surface-light);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
       transition: background 0.4s;
     }
 
-    body.dark .container {
-      background: rgba(15, 23, 42, 0.9);
+    body.dark main {
+      background: var(--surface-dark);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text-light);
+    }
+
+    body.dark label {
+      color: var(--text-dark);
     }
 
     input[type="text"] {
       width: 100%;
       padding: 12px;
       border-radius: 8px;
-      border: 1px solid #ccc;
+      border: 1px solid #cbd5e1;
       font-size: 1rem;
-      margin-bottom: 1rem;
       outline: none;
-      transition: border 0.3s;
+      transition: border 0.3s, box-shadow 0.3s;
+      font-family: 'Cairo', sans-serif;
     }
 
     input[type="text"]:focus {
       border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 119, 255, 0.2);
+    }
+
+    body.dark input[type="text"] {
+      background: var(--background-dark);
+      border-color: #475569;
+      color: var(--text-dark);
+    }
+
+    .help-text {
+      display: block;
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-muted-light);
+    }
+
+    body.dark .help-text {
+      color: var(--text-muted-dark);
     }
 
     button {
@@ -80,11 +125,22 @@
       color: white;
       font-size: 1.1rem;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: background 0.3s, transform 0.2s;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 600;
     }
 
     button:hover {
       background: var(--accent);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
     }
 
     #results {
@@ -92,36 +148,62 @@
     }
 
     .card {
-      background: rgba(255, 255, 255, 0.9);
+      background: var(--surface-light);
       border-radius: 10px;
-      padding: 1rem;
+      padding: 1.2rem;
       margin-bottom: 1rem;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      transition: transform 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border-left: 4px solid var(--primary);
     }
 
     .card:hover {
-      transform: scale(1.03);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     }
 
     body.dark .card {
-      background: rgba(30, 41, 59, 0.9);
+      background: rgba(30, 41, 59, 0.8);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+
+    .card p {
+      margin: 0.5rem 0;
     }
 
     #loader {
       display: none;
       text-align: center;
-      margin-top: 1rem;
+      margin: 1.5rem 0;
     }
 
-    #loader div {
-      width: 24px;
-      height: 24px;
+    .loader-content {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .loader-content div {
+      width: 32px;
+      height: 32px;
       border: 3px solid var(--primary);
       border-top-color: transparent;
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      display: inline-block;
+    }
+
+    .loader-content p {
+      margin: 0;
+      color: var(--text-muted-light);
+    }
+
+    body.dark .loader-content p {
+      color: var(--text-muted-dark);
     }
 
     @keyframes spin {
@@ -136,91 +218,383 @@
       color: white;
       border: none;
       border-radius: 50%;
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       cursor: pointer;
       font-size: 18px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      transition: background 0.3s;
+      transition: background 0.3s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .theme-toggle:hover {
       background: var(--accent);
+      transform: scale(1.05);
+    }
+
+    .theme-toggle:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    .notification {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .notification.error {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+      border-right: 4px solid var(--error);
+    }
+
+    .notification.success {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border-right: 4px solid var(--success);
+    }
+
+    .notification.info {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--primary);
+      border-right: 4px solid var(--primary);
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e2e8f0;
+      font-size: 0.875rem;
+      color: var(--text-muted-light);
+    }
+
+    body.dark .stats {
+      border-top-color: #334155;
+      color: var(--text-muted-dark);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     @media (max-width: 600px) {
-      .container { margin: 1rem; padding: 1rem; }
-      header { font-size: 1.2rem; }
+      main { 
+        margin: 1rem; 
+        padding: 1.2rem; 
+      }
+      header { 
+        font-size: 1.2rem; 
+        padding: 1rem;
+      }
+      .theme-toggle {
+        top: 10px;
+        left: 10px;
+        width: 40px;
+        height: 40px;
+      }
     }
   </style>
 </head>
 <body>
 
   <header>🔍 Crystal Lookup</header>
-  <button class="theme-toggle" id="themeBtn">🌙</button>
+  <button class="theme-toggle" id="themeBtn" aria-label="تبديل وضع السطوع">🌙</button>
 
-  <div class="container">
-    <input type="text" id="numberInput" placeholder="أدخل رقم الهاتف (مثلاً 05xxxxxxxx)">
+  <main>
+    <h1 class="sr-only">Crystal Lookup - البحث عن الأرقام السعودية</h1>
+    
+    <div class="form-group">
+      <label for="numberInput">رقم الهاتف</label>
+      <input type="text" id="numberInput" placeholder="أدخل رقم الهاتف (مثلاً 05xxxxxxxx)" aria-describedby="helpText">
+      <small id="helpText" class="help-text">يجب أن يبدأ الرقم بـ 05 ويتكون من 10 أرقام</small>
+    </div>
+    
     <button id="searchBtn">بحث الآن</button>
-    <div id="loader"><div></div></div>
+    
+    <div id="loader">
+      <div class="loader-content">
+        <div></div>
+        <p>جاري البحث في قاعدة البيانات...</p>
+      </div>
+    </div>
+    
     <div id="results"></div>
-  </div>
+    
+    <div class="stats">
+      <span id="searchCount">عدد عمليات البحث: 0</span>
+      <span id="lastSearch">آخر بحث: -</span>
+    </div>
+  </main>
 
   <script>
-    // ✅ Theme toggle
-    const body = document.body;
-    const themeBtn = document.getElementById('themeBtn');
-    if (localStorage.getItem('theme') === 'dark') body.classList.add('dark');
-
-    themeBtn.onclick = () => {
-      body.classList.toggle('dark');
-      const theme = body.classList.contains('dark') ? 'dark' : 'light';
-      localStorage.setItem('theme', theme);
-      themeBtn.textContent = body.classList.contains('dark') ? '☀️' : '🌙';
+    // ✅ إدارة الحالة والتكوين
+    const config = {
+      apiEndpoint: 'https://api.example.com/number-lookup', // تم تغيير الرابط
+      requestTimeout: 10000, // 10 ثواني
+      maxSearches: 100 // الحد الأقصى لعمليات البحث المسجلة
     };
 
-    // ✅ Search logic
-    const searchBtn = document.getElementById('searchBtn');
-    const numberInput = document.getElementById('numberInput');
-    const loader = document.getElementById('loader');
-    const results = document.getElementById('results');
+    // ✅ حالة التطبيق
+    const state = {
+      searchHistory: JSON.parse(localStorage.getItem('searchHistory')) || [],
+      theme: localStorage.getItem('theme') || 'light'
+    };
 
-    searchBtn.addEventListener('click', async () => {
-      const number = numberInput.value.trim();
-      results.innerHTML = '';
+    // ✅ عناصر DOM
+    const elements = {
+      body: document.body,
+      themeBtn: document.getElementById('themeBtn'),
+      searchBtn: document.getElementById('searchBtn'),
+      numberInput: document.getElementById('numberInput'),
+      loader: document.getElementById('loader'),
+      results: document.getElementById('results'),
+      searchCount: document.getElementById('searchCount'),
+      lastSearch: document.getElementById('lastSearch')
+    };
+
+    // ✅ تهيئة التطبيق
+    function initApp() {
+      // تطبيق السمة المحفوظة
+      if (state.theme === 'dark') {
+        elements.body.classList.add('dark');
+        elements.themeBtn.textContent = '☀️';
+      }
+      
+      // تحديث الإحصائيات
+      updateStats();
+      
+      // إضافة مستمعي الأحداث
+      setupEventListeners();
+    }
+
+    // ✅ إعداد مستمعي الأحداث
+    function setupEventListeners() {
+      // تبديل السمة
+      elements.themeBtn.addEventListener('click', toggleTheme);
+      
+      // زر البحث
+      elements.searchBtn.addEventListener('click', performSearch);
+      
+      // البحث بالضغط على Enter
+      elements.numberInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          performSearch();
+        }
+      });
+      
+      // التحقق أثناء الكتابة
+      elements.numberInput.addEventListener('input', validateInput);
+    }
+
+    // ✅ تبديل السمة
+    function toggleTheme() {
+      elements.body.classList.toggle('dark');
+      const theme = elements.body.classList.contains('dark') ? 'dark' : 'light';
+      localStorage.setItem('theme', theme);
+      elements.themeBtn.textContent = elements.body.classList.contains('dark') ? '☀️' : '🌙';
+      elements.themeBtn.setAttribute('aria-label', 
+        elements.body.classList.contains('dark') ? 'تفعيل الوضع الفاتح' : 'تفعيل الوضع الداكن');
+    }
+
+    // ✅ التحقق من صحة الإدخال
+    function validateInput() {
+      const value = elements.numberInput.value.trim();
+      const isValid = /^05\d{0,8}$/.test(value);
+      
+      if (value && !isValid) {
+        elements.numberInput.setCustomValidity('يجب أن يبدأ الرقم بـ 05 ويليه 8 أرقام');
+        elements.numberInput.style.borderColor = 'var(--error)';
+      } else {
+        elements.numberInput.setCustomValidity('');
+        elements.numberInput.style.borderColor = value ? 'var(--success)' : '#cbd5e1';
+      }
+    }
+
+    // ✅ تنفيذ البحث
+    async function performSearch() {
+      const number = elements.numberInput.value.trim();
+      
+      // مسح النتائج السابقة
+      elements.results.innerHTML = '';
+      
+      // التحقق من صحة الرقم
       if (!/^05\d{8}$/.test(number)) {
-        results.innerHTML = '<p style="color:red;">❌ أدخل رقمًا سعوديًا صحيحًا يبدأ بـ05</p>';
+        showNotification('❌ أدخل رقمًا سعوديًا صحيحًا يبدأ بـ05 ويتكون من 10 أرقام', 'error');
         return;
       }
-
-      loader.style.display = 'block';
+      
+      // عرض مؤشر التحميل
+      showLoader();
+      
       try {
-        const response = await fetch('https://dalil-ksa.com/analytics.php', {
+        // إعداد مهلة للطلب
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), config.requestTimeout);
+        
+        // إرسال طلب البحث
+        const response = await fetch(config.apiEndpoint, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({ number })
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({ 
+            number,
+            source: 'crystal-lookup'
+          }),
+          signal: controller.signal
         });
-
-        const json = await response.json();
-        loader.style.display = 'none';
-
-        if (json && (json.n || json.name)) {
-          results.innerHTML = `
-            <div class="card">
-              <h3>📞 الاسم: ${json.name || json.n || 'غير معروف'}</h3>
-              <p>📱 الرقم: ${number}</p>
-              <p>🌍 الدولة: ${json.country || 'السعودية'}</p>
-              <p>💬 ملاحظات: ${json.note || 'لا توجد معلومات إضافية'}</p>
-            </div>
-          `;
-        } else {
-          results.innerHTML = '<p>لم يتم العثور على نتائج 🔎</p>';
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          throw new Error(`خطأ في الخادم: ${response.status}`);
         }
-      } catch (err) {
-        loader.style.display = 'none';
-        results.innerHTML = '<p style="color:red;">حدث خطأ أثناء الاتصال بالخادم ⚠️</p>';
+        
+        const data = await response.json();
+        
+        // إخفاء مؤشر التحميل
+        hideLoader();
+        
+        // معالجة النتائج
+        processResults(data, number);
+        
+        // تحديث السجل والإحصائيات
+        updateSearchHistory(number);
+        
+      } catch (error) {
+        hideLoader();
+        
+        if (error.name === 'AbortError') {
+          showNotification('⏰ تجاوز الوقت المحدد للاتصال بالخادم', 'error');
+        } else {
+          showNotification('⚠️ حدث خطأ أثناء الاتصال بالخادم', 'error');
+          console.error('Search error:', error);
+        }
       }
-    });
+    }
+
+    // ✅ معالجة نتائج البحث
+    function processResults(data, number) {
+      if (data && (data.name || data.n)) {
+        const name = data.name || data.n || 'غير معروف';
+        const country = data.country || 'السعودية';
+        const note = data.note || 'لا توجد معلومات إضافية';
+        const type = data.type || 'غير محدد';
+        
+        elements.results.innerHTML = `
+          <div class="card">
+            <h3>✅ تم العثور على النتائج</h3>
+            <p><strong>📞 الاسم:</strong> ${name}</p>
+            <p><strong>📱 الرقم:</strong> ${number}</p>
+            <p><strong>🌍 الدولة:</strong> ${country}</p>
+            <p><strong>📋 النوع:</strong> ${type}</p>
+            <p><strong>💬 ملاحظات:</strong> ${note}</p>
+          </div>
+        `;
+        
+        showNotification('✅ تم العثور على معلومات الرقم بنجاح', 'success');
+      } else {
+        elements.results.innerHTML = `
+          <div class="card">
+            <h3>🔍 لم يتم العثور على نتائج</h3>
+            <p>لم نتمكن من العثور على معلومات للرقم <strong>${number}</strong> في قاعدة البيانات.</p>
+            <p>يرجى التحقق من الرقم والمحاولة مرة أخرى.</p>
+          </div>
+        `;
+        
+        showNotification('🔎 لم يتم العثور على نتائج للرقم المطلوب', 'info');
+      }
+    }
+
+    // ✅ عرض الإشعارات
+    function showNotification(message, type = 'info') {
+      // إزالة أي إشعارات سابقة
+      const existingNotification = document.querySelector('.notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+      
+      // إنشاء إشعار جديد
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      notification.setAttribute('role', 'alert');
+      notification.setAttribute('aria-live', 'polite');
+      
+      // إدراج الإشعار قبل النتائج
+      elements.results.parentNode.insertBefore(notification, elements.results);
+      
+      // إزالة الإشعار تلقائياً بعد 5 ثواني
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.remove();
+        }
+      }, 5000);
+    }
+
+    // ✅ عرض مؤشر التحميل
+    function showLoader() {
+      elements.loader.style.display = 'block';
+      elements.searchBtn.disabled = true;
+      elements.searchBtn.textContent = 'جاري البحث...';
+    }
+
+    // ✅ إخفاء مؤشر التحميل
+    function hideLoader() {
+      elements.loader.style.display = 'none';
+      elements.searchBtn.disabled = false;
+      elements.searchBtn.textContent = 'بحث الآن';
+    }
+
+    // ✅ تحديث سجل البحث
+    function updateSearchHistory(number) {
+      const searchRecord = {
+        number,
+        timestamp: new Date().toISOString(),
+        date: new Date().toLocaleString('ar-SA')
+      };
+      
+      state.searchHistory.unshift(searchRecord);
+      
+      // الحفاظ على الحد الأقصى لعمليات البحث
+      if (state.searchHistory.length > config.maxSearches) {
+        state.searchHistory = state.searchHistory.slice(0, config.maxSearches);
+      }
+      
+      // حفظ السجل في localStorage
+      localStorage.setItem('searchHistory', JSON.stringify(state.searchHistory));
+      
+      // تحديث الإحصائيات
+      updateStats();
+    }
+
+    // ✅ تحديث الإحصائيات
+    function updateStats() {
+      elements.searchCount.textContent = `عدد عمليات البحث: ${state.searchHistory.length}`;
+      
+      if (state.searchHistory.length > 0) {
+        const lastSearch = state.searchHistory[0];
+        elements.lastSearch.textContent = `آخر بحث: ${lastSearch.date}`;
+      }
+    }
+
+    // ✅ بدء التطبيق
+    document.addEventListener('DOMContentLoaded', initApp);
   </script>
 
 </body>
