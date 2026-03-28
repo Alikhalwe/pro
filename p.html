@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام البحث الشامل Crystal- Pro</title> 
+    <style>
+        :root { --primary: #ff4757; --success: #2ed573; --dark: #2f3542; --bg: #f1f2f6; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg); margin: 0; padding: 20px; direction: rtl; }
+        .container { width: 100%; max-width: 1000px; margin: auto; }
+        
+        .search-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 6px solid var(--primary); }
+        .main-title { margin: 0 0 20px 0; color: var(--dark); font-size: 24px; text-align: center; }
+        
+        .search-type-selector { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
+        .type-btn { padding: 8px 20px; border: 2px solid #ddd; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; background: #fff; }
+        .type-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .search-box { display: flex; gap: 12px; flex-wrap: wrap; }
+        input { flex: 3; padding: 15px; border: 2px solid #e9ecef; border-radius: 12px; font-size: 16px; outline: none; transition: 0.2s; }
+        input:focus { border-color: var(--primary); }
+        button#btnSearch { flex: 1; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 16px; min-width: 120px; }
+
+        .info-panel { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 20px; border-radius: 12px; margin-bottom: 20px; display: none; border-right: 4px solid var(--dark); }
+        .debug-console { background: #212529; color: #39ff14; padding: 12px; border-radius: 10px; font-family: monospace; font-size: 11px; margin-bottom: 20px; display: none; direction: ltr; text-align: left; max-height: 120px; overflow-y: auto; }
+
+        .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-bottom: 4px solid #eee; }
+        .card-name { font-size: 17px; font-weight: bold; color: #2d3436; margin-bottom: 10px; display: block; }
+        .card-actions { display: flex; gap: 8px; border-top: 1px solid #f1f3f5; padding-top: 12px; margin-top: 10px; }
+        .btn-card { flex: 1; padding: 9px; border-radius: 8px; border: none; cursor: pointer; font-size: 12px; font-weight: bold; text-decoration: none; text-align: center; }
+        .btn-copy { background: #f8f9fa; color: #495057; border: 1px solid #dee2e6; }
+        .btn-wa { background: #25d366; color: white; }
+
+        .footer-actions { text-align: center; margin: 40px 0; display: none; }
+        #loadMoreBtn { padding: 16px 50px; background: var(--dark); color: white; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="search-card">
+        <h2 class="main-title"> برمجة Ai تجريبية </h2>
+        
+        <div class="search-type-selector">
+            <div id="typePhone" class="type-btn active" onclick="setSearchType('phone')">بحث بالرقم</div>
+            <div id="typeName" class="type-btn" onclick="setSearchType('name')">بحث بالاسم</div>
+        </div>
+
+        <div class="search-box">
+            <input type="tel" id="variableInput" inputmode="numeric" placeholder="أدخل الرقم هنا..." onkeypress="if(event.key === 'Enter') startSearch()">
+            <button id="btnSearch" onclick="startSearch()">جلب النتائج</button>
+        </div>
+    </div>
+
+    <div id="debugConsole" class="debug-console"></div>
+
+    <div id="infoPanel" class="info-panel">
+        <span>إجمالي النتائج المستخرجة:</span>
+        <span id="totalCounter" style="font-weight:bold; color:var(--primary);">اصبر شوي </span>
+    </div>
+
+    <div id="resultsGrid" class="results-grid"></div>
+
+    <div id="footerActions" class="footer-actions">
+        <button id="loadMoreBtn" onclick="loadMore()">جلب المزيد من البيانات ▼</button>
+    </div>
+</div>
+
+<script>
+    let searchType = 'phone';
+    let queryValue = "";
+    let offsetValue = 0;
+    let limitValue = 100;
+    let totalLoaded = 0;
+
+    // دالة التبديل الذكية لتغيير لوحة المفاتيح
+    function setSearchType(type) {
+        searchType = type;
+        const inputField = document.getElementById('variableInput');
+        
+        // تحديث شكل الأزرار
+        document.getElementById('typePhone').classList.toggle('active', type === 'phone');
+        document.getElementById('typeName').classList.toggle('active', type === 'name');
+        
+        if (type === 'phone') {
+            inputField.placeholder = "أدخل الرقم هنا...";
+            inputField.type = "tel"; // يفتح لوحة أرقام الهاتف
+            inputField.setAttribute("inputmode", "numeric"); // تأكيد إضافي لفتح الأرقام فقط
+        } else {
+            inputField.placeholder = "أدخل الاسم هنا...";
+            inputField.type = "text"; // يعيد لوحة المفاتيح العادية (حروف)
+            inputField.removeAttribute("inputmode");
+        }
+        inputField.value = ""; // مسح الحقل عند التبديل
+        inputField.focus(); // وضع المؤشر تلقائياً
+    }
+
+    function startSearch() {
+        const input = document.getElementById('variableInput').value.trim();
+        if (!input) return;
+
+        queryValue = input;
+        offsetValue = 0;
+        totalLoaded = 0;
+        document.getElementById('resultsGrid').innerHTML = "";
+        document.getElementById('infoPanel').style.display = 'flex';
+        document.getElementById('debugConsole').style.display = 'block';
+        
+        executeFetch();
+    }
+
+    async function executeFetch() {
+        const debug = document.getElementById('debugConsole');
+        const grid = document.getElementById('resultsGrid');
+        const footer = document.getElementById('footerActions');
+
+        debug.innerText += `>>> [Mode: ${searchType.toUpperCase()}] Requesting: ${queryValue} | Offset: ${offsetValue}\n`;
+
+        const targetUrl = `https://numberbouk.net/h1/search/s?nid=${encodeURIComponent(queryValue)}&fcntry=966&devuid=a3278667aa656728&vers=8&top=${limitValue}&limit=${limitValue}&offset=${offsetValue}&start=${offsetValue}`;
+
+        try {
+            const response = await fetch(targetUrl);
+            const data = await response.json();
+
+            if (data && data.t && data.t.length > 0) {
+                data.t.forEach(item => {
+                    renderItem(item);
+                    totalLoaded++;
+                });
+
+                document.getElementById('totalCounter').innerText = totalLoaded;
+                footer.style.display = 'block';
+                debug.innerText += `>>> Success: Received ${data.t.length} results.\n\n`;
+            } else {
+                debug.innerText += ">>> No data found or end of list.\n";
+                if(totalLoaded === 0) grid.innerHTML = '<p style="text-align:center; width:100%;">لا توجد نتائج مطابقة.</p>';
+                footer.style.display = 'none';
+            }
+        } catch (err) {
+            debug.innerText += `>>> ERROR: ${err.message}. (تأكد من تفعيل إضافة CORS)\n`;
+        }
+    }
+
+    function loadMore() {
+        offsetValue += limitValue;
+        document.getElementById('loadMoreBtn').innerText = "جاري التحميل...";
+        executeFetch().then(() => {
+            document.getElementById('loadMoreBtn').innerText = "جلب المزيد من البيانات ▼";
+        });
+    }
+
+    function renderItem(item) {
+        const grid = document.getElementById('resultsGrid');
+        const card = document.createElement('div');
+        card.className = 'card';
+        const name = item.Name || 'مجهول';
+        const phone = item.Phone || '';
+        const code = item["Country Code"] || '966';
+
+        card.innerHTML = `
+            <div style="font-size:11px; color:#aaa;">الاسم المستخرج:</div>
+            <span class="card-name">${name}</span>
+            <div style="font-size:11px; color:#aaa;">الرقم:</div>
+            <span style="font-weight:bold; color:#333;">${phone || '-'}</span>
+            <div class="card-actions">
+                <button class="btn-card btn-copy" onclick="copyVal('${name}')">📋 نسخ</button>
+                ${phone ? `<a href="https://wa.me/${code}${phone}" target="_blank" class="btn-card btn-wa">💬 واتساب</a>` : ''}
+            </div>
+        `;
+        grid.appendChild(card);
+    }
+
+    function copyVal(txt) {
+        navigator.clipboard.writeText(txt);
+        alert("تم نسخ: " + txt);
+    }
+</script>
+
+</body>
+</html>
