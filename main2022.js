@@ -1461,7 +1461,7 @@ function loadmoreResult() {
         option_c_code = "ALL";
     }
 
-    $('#dvloadmorewait').html('<img src="spinner-rosetta-blue.gif" style="width:24px;"/>');
+    $('#dvloadmorewait').html('<img src="https://raw.githubusercontent.com/Alikhalwe/pro/refs/heads/master/spinner-rosetta-blue.gif" style="width:24px;"/>');
 
     $('#li_rearch_result').css('display', '');
     $('#profile_settings').css('display', 'none');
@@ -1819,7 +1819,7 @@ function verifymyNumber() {
 
             window.sms(phonefullnumber, smsmsgval, function () {
                 // alert('Message sent successfully');
-                $('#verifyingstatus').html("Please Wait...<br/>Step 1 Done.<img src='spinner-rosetta-blue.gif' style='width:16px'/><br/>60 seconds maximum");
+                $('#verifyingstatus').html("Please Wait...<br/>Step 1 Done.<img src='https://raw.githubusercontent.com/Alikhalwe/pro/refs/heads/master/spinner-rosetta-blue.gif' style='width:16px'/><br/>60 seconds maximum");
 
                 errorcasetimeouthandler = window.setInterval(function () {
                     console.log("checking for sms received");
@@ -1924,7 +1924,7 @@ function submtusrtozeserver(msg) {
 
 }
 function sendmybasicinfo() {
-    $('#dvprofilewaiter').html("Please Wait...<br/><img src='spinner-rosetta-blue.gif' style='width:16px'/><br/>");
+    $('#dvprofilewaiter').html("Please Wait...<br/><img src='https://raw.githubusercontent.com/Alikhalwe/pro/refs/heads/master/spinner-rosetta-blue.gif' style='width:16px'/><br/>");
     var option_c_code = $('option:selected', $('#cmbcountries')).attr('ccode');
     option_c_code = option_c_code.replace("+", "");
 
@@ -2077,7 +2077,7 @@ function fillmyprofile() {
     }
 }
 function getdvinf() {
-    $('#dv_contacts_synch_progress').html('Please wait <img src="spinner-rosetta-blue.gif" />');
+    $('#dv_contacts_synch_progress').html('Please wait <img src="https://raw.githubusercontent.com/Alikhalwe/pro/refs/heads/master/spinner-rosetta-blue.gif" />');
     $('#waiter').html('');
 
     Ajax.call({
