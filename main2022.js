@@ -1,4 +1,4 @@
-﻿var dealinguri = "https://numberbouk.net/h1";
+var dealinguri = "https://numberbouk.net/h1";
 var suggestions_dealinguri = "https://numberbouk.net/h1";
 var dealingurie = "https://raw.githubusercontent.com/Alikhalwe/pro/master";
 var dealingurib = "https://raw.githubusercontent.com/Alikhalwe/pro/master";
@@ -1233,7 +1233,7 @@ function searfor() {
                     $('#li_rearch_result').html(markup);
 
 
-                    var load_more_markup = '<li class="load-more"  style="height:80px;width:100%;"  data-icon="refresh"><table align="center" style="width:100%;"><tr><td style="vertical-align:middle"><img src="interact.png" style="width:48px;float:right;" /></td><td style="vertical-align:middle"><span style="color:#669900;"> جاري البحث ...</span></td><td style="vertical-align:middle"><div id="dvloadmorewait"></div></td></tr></table></li>';
+                    var load_more_markup = '<li class="load-more"  style="height:80px;width:100%;"  data-icon="refresh"><table align="center" style="width:100%;"><tr><td style="vertical-align:middle"><img src="https://raw.githubusercontent.com/Alikhalwe/pro/refs/heads/master/interact.png" style="width:48px;float:right;" /></td><td style="vertical-align:middle"><span style="color:#669900;"> جاري البحث ...</span></td><td style="vertical-align:middle"><div id="dvloadmorewait"></div></td></tr></table></li>';
 
                     $('#pnl_result_footer_load_more').html(load_more_markup);
 
