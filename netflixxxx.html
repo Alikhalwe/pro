@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Movie World Pro</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+
+   <style>
+        /* كود CSS بسيط لضبط أبعاد المشغل وجعله متناسقاً */
+        .player-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px; /* يمكنك تعديل العرض الأقصى حسب تصميمك */
+            margin: 0 auto;
+            padding-bottom: 56.25%; /* نسبة العرض إلى الارتفاع 16:9 */
+            height: 0;
+            background-color: #000;
+        }
+        .player-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Cairo',sans-serif;
+}
+
+body{
+
+background:#0b0f17;
+color:#fff;
+overflow-x:hidden;
+
+}
+
+a{
+text-decoration:none;
+color:white;
+}
+
+header{
+
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:75px;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+padding:0 30px;
+
+background:rgba(0,0,0,.55);
+backdrop-filter:blur(12px);
+
+z-index:999;
+
+}
+
+.logo{
+
+font-size:30px;
+font-weight:bold;
+color:#00c6ff;
+
+}
+
+nav{
+
+display:flex;
+gap:20px;
+
+}
+
+nav a{
+
+opacity:.8;
+transition:.3s;
+
+}
+
+nav a:hover{
+
+opacity:1;
+color:#00c6ff;
+
+}
+
+.right{
+
+display:flex;
+align-items:center;
+gap:12px;
+
+}
+
+#search{
+
+width:260px;
+padding:12px;
+border:none;
+outline:none;
+
+border-radius:30px;
+
+background:#1a2332;
+color:white;
+
+}
+
+button{
+
+cursor:pointer;
+border:none;
+
+}
+
+.iconBtn{
+
+width:42px;
+height:42px;
+
+border-radius:50%;
+
+background:#1a2332;
+color:white;
+font-size:18px;
+
+}
+
+.hero{
+
+height:92vh;
+
+background-size:cover;
+background-position:center;
+
+display:flex;
+align-items:end;
+
+padding:80px;
+
+position:relative;
+
+}
+
+.hero::after{
+
+content:'';
+
+position:absolute;
+
+left:0;
+top:0;
+width:100%;
+height:100%;
+
+background:
+
+linear-gradient(to top,#0b0f17 5%,transparent),
+
+linear-gradient(to right,#000000d8 15%,transparent);
+
+}
+
+.heroContent{
+
+position:relative;
+z-index:10;
+max-width:650px;
+
+}
+
+.hero h1{
+
+font-size:58px;
+margin-bottom:15px;
+
+}
+
+.hero p{
+
+line-height:2;
+opacity:.9;
+
+margin-bottom:25px;
+
+}
+
+.playBtn{
+
+padding:14px 28px;
+
+background:#00c6ff;
+
+color:white;
+
+border-radius:30px;
+
+font-size:18px;
+
+}
+
+section{
+
+padding:40px;
+
+}
+
+.sectionTitle{
+
+font-size:28px;
+
+margin-bottom:25px;
+
+color:#00c6ff;
+
+}
+
+.row{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+
+gap:18px;
+
+}
+
+.card{
+
+background:#151d2c;
+
+border-radius:14px;
+
+overflow:hidden;
+
+transition:.35s;
+
+cursor:pointer;
+
+}
+
+.card:hover{
+
+transform:translateY(-8px);
+
+box-shadow:0 0 30px rgba(0,198,255,.35);
+
+}
+
+.card img{
+
+width:100%;
+height:290px;
+object-fit:cover;
+
+}
+
+.info{
+
+padding:12px;
+
+}
+
+.info h3{
+
+font-size:16px;
+margin-bottom:10px;
+
+}
+
+.rate{
+
+color:#ffd43b;
+
+}
+
+.modal {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: none; /* سيتم تغييره إلى flex عبر جافاسكريبت عند الفتح */
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 9999;
+  box-sizing: border-box; /* تضمن عدم خروج المحتوى عن الشاشة بسبب الـ padding */
+}
+
+.modalBox {
+  background: #111827;
+  color: #ffffff; /* إضافة لون نص أبيض افتراضي ليتناسب مع الخلفية المظلمة */
+  width: 100%;
+  max-width: 1000px;
+  /* تحديد حد أقصى للارتفاع لضمان عدم خروج الصندوق عن الشاشة، مع تفعيل التمرير الداخلي إذا لزم الأمر */
+  max-height: 90vh; 
+  overflow-y: auto; 
+  border-radius: 20px;
+  display: flex;
+  gap: 25px;
+  padding: 25px;
+  box-sizing: border-box;
+}
+
+/* تحسين تجاوب العناصر (الصورة والتفاصيل) */
+.modal img {
+  width: 100%;
+  max-width: 300px; /* جعل الصورة مرنة في الشاشات الصغيرة وثابتة في الكبيرة */
+  height: auto; /* الحفاظ على أبعاد الصورة */
+  border-radius: 15px;
+  object-fit: cover;
+}
+
+.details {
+  flex: 1;
+  min-width: 280px; /* تضمن هبوط التفاصيل لأسفل الصورة بسلاسة في الشاشات الصغيرة بدلاً من انضغاطها */
+  display: flex;
+  flex-direction: column;
+}
+
+.details h2 {
+  margin-top: 0; /* إلغاء الهامش العلوي الافتراضي لتنسيق مثالي */
+  margin-bottom: 15px;
+}
+
+.details p {
+  line-height: 1.8; /* تقليل طفيف لزيادة المقروئية */
+  margin-bottom: 15px;
+}
+
+.close {
+  align-self: flex-start; /* يجعل الزر يأخذ حجم محتواه فقط ولا يتمدد بعرض القسم */
+  margin-top: auto; /* يدفع زر الإغلاق ليكون دائماً في الأسفل حتى لو كان النص قصيراً */
+  background: #ff3b30;
+  padding: 12px 20px;
+  border-radius: 8px;
+  color: white;
+  border: none; /* إزالة الحدود الافتراضية للزر */
+  cursor: pointer; /* إظهار مؤشر اليد عند تمرير الماوس فوق الزر */
+  transition: background 0.2s ease; /* تأثير ناعم عند التمرير */
+}
+
+.close:hover {
+  background: #e03228; /* تغميق لون الزر قليلاً عند تمرير الماوس */
+}
+
+footer{
+
+text-align:center;
+
+padding:40px;
+
+opacity:.6;
+
+}
+
+@media(max-width:700px){
+
+header{
+
+padding:15px;
+
+flex-wrap:wrap;
+
+height:auto;
+
+}
+
+#search{
+
+width:100%;
+
+}
+
+.hero {
+  padding: 30px;
+  height: auto; /* تم التغيير من 75vh إلى auto لمنع تغطية الشاشة وتداخل العناصر */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 35px;
+  margin-bottom: 10px; /* مسافة أمان أسفل العنوان */
+}
+
+/* تم حذف القفل الزائد الذي كان هنا } */
+
+.modalBox {
+  display: flex; /* تأكد من إضافة flex لتفعيل الخصائص أدناه */
+  flex-direction: column;
+  align-items: center;
+}
+
+.modal img {
+  width: 220px;
+  height: auto; /* للحفاظ على أبعاد الصورة دون تشويه */
+}
+
+#trailer iframe {
+  width: 100%;
+  max-width: 600px;
+  height: 330px;
+  border-radius: 15px;
+  border: none;
+  margin-top: 20px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">
+
+🎬 تطوير علي Movie World Pro
+
+</div>
+
+<nav>
+
+<a href="#">الرئيسية</a>
+
+<a href="#movies">أفلام</a>
+
+<a href="#tv">مسلسلات</a>
+
+<a href="#top">الأعلى تقييماً</a>
+
+</nav>
+
+<div class="right">
+
+
+<input
+id="search"
+placeholder="ابحث...">
+
+<button
+class="iconBtn"
+id="searchBtn">
+
+🔍
+
+</button>
+
+</div>
+
+</header>
+
+<div
+class="hero"
+id="hero">
+
+<div class="heroContent">
+
+<h1 id="heroTitle">
+
+جارٍ التحميل...
+
+</h1>
+
+<p id="heroText">
+
+...
+
+</p>
+
+<button
+class="playBtn">
+
+▶ مشاهدة التفاصيل
+
+</button>
+
+</div>
+
+</div>
+
+<section>
+
+<div class="sectionTitle">
+
+🔥 الرائج
+
+</div>
+
+<div
+class="row"
+id="trending">
+
+</div>
+
+</section>
+<section id="movies">
+
+<div class="sectionTitle">
+
+🎥 أحدث الأفلام
+
+</div>
+
+<div class="row" id="movieList"></div>
+
+</section>
+
+<section id="tv">
+
+<div class="sectionTitle">
+
+📺 أشهر المسلسلات
+
+</div>
+
+<div class="row" id="tvList"></div>
+
+</section>
+
+<section id="top">
+
+<div class="sectionTitle">
+
+⭐ الأعلى تقييماً
+
+</div>
+
+<div class="row" id="topList"></div>
+
+</section>
+
+<div class="modal" id="modal">
+
+<div class="modalBox">
+
+<img id="modalPoster">
+
+<div class="details">
+
+<h2 id="modalTitle"></h2>
+
+<p id="modalOverview"></p>
+
+<p><b>⭐ التقييم:</b> <span id="modalRate"></span></p>
+
+<p><b>📅 التاريخ:</b> <span id="modalDate"></span></p>
+
+
+
+
+<div id="trailer"></div>
+
+
+
+    <!-- حاوية المشغل الخاصة بك -->
+    <div class="player-container" id="player-wrap"> 
+        <iframe id="vidfast-player" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe> 
+    </div>
+
+<button class="close" onclick="closeModal()">
+
+إغلاق
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<footer>
+
+تطوير كريستال علي © 2026
+
+</footer>
+
+<script>
+
+const API_KEY="ef74cc8c3cb7f6100ffe47b9d59feada";
+
+const BASE="https://api.themoviedb.org/3";
+const VIDFAST_BASE_URL = "ttps://vidfast.vc";
+
+ const IMG="https://image.tmdb.org/t/p/w780";
+
+async function api(url){
+
+const res=await fetch(url);
+
+return await res.json();
+
+}
+
+function displayResults(results) {
+        const resultsContainer = document.getElementById('results');
+        resultsContainer.innerHTML = '';
+
+        if (!results || results.length === 0) {
+            resultsContainer.innerHTML = '<p>لم يتم العثور على نتائج. تأكد من صحة الاسم.</p>';
+            return;
+        }
+
+        results.forEach(item => {
+            if (item.media_type !== 'movie' && item.media_type !== 'tv') return;
+
+            const title = item.title || item.name;
+            const posterUrl = item.poster_path ? `${IMAGE_BASE_URL}${item.poster_path}` : 'https://placeholder.com';
+
+            const card = document.createElement('div');
+            card.className = 'movie-card';
+            card.onclick = () => showAndPlay(item.id, item.media_type);
+            card.innerHTML = `
+                <img src="${posterUrl}" alt="${title}" onerror="this.src='https://placeholder.com'">
+                <p title="${title}">${title}</p>
+            `;
+            resultsContainer.appendChild(card);
+        });
+    }
+
+
+function showAndPlay(id, type) {
+        const item = currentResults.find(x => x.id === id && x.media_type === type);
+        if (!item) return;
+
+        const title = item.title || item.name;
+        const posterUrl = item.poster_path ? `${IMAGE_BASE_URL}${item.poster_path}` : 'https://placeholder.com';
+        const date = item.release_date || item.first_air_date || 'غير متوفر';
+        const overview = item.overview || 'لا يوجد وصف متاح لهذا العمل باللغة العربية حالياً.';
+        const rating = item.vote_average ? item.vote_average.toFixed(1) : '0.0';
+
+        document.getElementById('detail-title').innerText = title;
+        document.getElementById('detail-poster').src = posterUrl;
+        document.getElementById('detail-date').innerText = `تاريخ الإصدار: ${date}`;
+        document.getElementById('detail-rating').innerText = rating;
+        document.getElementById('detail-overview').innerText = overview;
+        document.getElementById('info-box').style.display = 'block';
+
+        const playerWrap = document.getElementById('player-wrap');
+        const iframe = document.getElementById('vidfast-player');
+
+        // صياغة الروابط الصحيحة لـ VidFast بناءً على التوثيق الفعلي:
+        // للأفلام: /movie/{id} | للمسلسلات: /tv/{id}/{season}/{episode}
+        let embedUrl = '';
+        if (type === 'movie') {
+            embedUrl = `${VIDFAST_BASE_URL}/movie/${id}`; 
+        } else if (type === 'tv') {
+            embedUrl = `${VIDFAST_BASE_URL}/tv/${id}/1/1`;
+        }
+
+        iframe.src = embedUrl;
+        playerWrap.style.display = 'block';
+        
+        document.getElementById('info-box').scrollIntoView({ behavior: 'smooth' });
+    }
+
+function card(item){
+
+const title=item.title||item.name;
+
+const date=item.release_date||item.first_air_date||"";
+
+return `
+
+<div class="card"
+
+onclick='details(${JSON.stringify(item)})'>
+
+<img src="${IMG}${item.poster_path}">
+
+<div class="info">
+
+<h3>${title}</h3>
+
+<div class="rate">
+
+⭐ ${item.vote_average}
+<div class="rate">
+
+الرقم ${item.id}
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+async function loadTrending(){
+
+const data=await api(
+
+`${BASE}/trending/all/week?api_key=${API_KEY}&language=ar-SA`
+
+);
+
+document.getElementById("trending").innerHTML="";
+
+data.results.forEach(i=>{
+
+if(i.poster_path){
+
+document.getElementById("trending").innerHTML+=card(i);
+
+}
+
+});
+
+const hero=data.results[0];
+
+document.getElementById("hero").style.backgroundImage=
+
+`url(${IMG}${hero.backdrop_path})`;
+
+document.getElementById("heroTitle").innerText=
+
+hero.title||hero.name;
+
+document.getElementById("heroText").innerText=
+
+(hero.overview||"").substring(0,220)+"...";
+
+}
+
+async function loadMovies(){
+
+const data=await api(
+
+`${BASE}/movie/now_playing?api_key=${API_KEY}&language=ar-SA`
+
+);
+
+document.getElementById("movieList").innerHTML="";
+
+data.results.forEach(i=>{
+
+if(i.poster_path){
+
+document.getElementById("movieList").innerHTML+=card(i);
+
+}
+
+});
+
+}
+async function loadTV(){
+
+const data=await api(
+
+`${BASE}/tv/popular?api_key=${API_KEY}&language=ar-SA`
+
+);
+
+document.getElementById("tvList").innerHTML="";
+
+data.results.forEach(i=>{
+
+if(i.poster_path){
+
+document.getElementById("tvList").innerHTML+=card(i);
+
+}
+
+});
+
+}
+
+
+async function loadTop(){
+
+const data=await api(
+
+`${BASE}/movie/top_rated?api_key=${API_KEY}&language=ar-SA`
+
+);
+
+document.getElementById("topList").innerHTML="";
+
+data.results.forEach(i=>{
+
+if(i.poster_path){
+
+document.getElementById("topList").innerHTML+=card(i);
+
+}
+
+});
+
+}
+
+
+
+async function searchMovies(){
+
+const value=document.getElementById("search").value.trim();
+
+
+if(!value) return;
+
+
+const data=await api(
+
+`${BASE}/search/multi?api_key=${API_KEY}&language=ar-SA&query=${encodeURIComponent(value)}`
+
+);
+
+
+document.getElementById("trending").innerHTML="";
+
+
+data.results.forEach(i=>{
+
+if(i.poster_path){
+
+document.getElementById("trending").innerHTML+=card(i);
+
+}
+
+});
+
+
+window.scrollTo({
+
+top:500,
+
+behavior:"smooth"
+
+});
+
+}
+
+
+
+async function details(item){
+
+document.getElementById("modal").style.display="flex";
+
+
+document.getElementById("modalPoster").src=
+
+item.poster_path ? IMG+item.poster_path : "";
+
+
+document.getElementById("modalTitle").innerText=
+
+item.title || item.name;
+
+
+document.getElementById("modalOverview").innerText=
+
+item.overview || "لا يوجد وصف";
+
+
+document.getElementById("modalRate").innerText=
+
+item.vote_average || "-";
+
+
+document.getElementById("modalDate").innerText=
+
+item.release_date || item.first_air_date || "-";
+
+
+// جلب التريلر
+
+let type = item.media_type==="tv" || item.name 
+? "tv"
+: "movie";
+
+
+const videos = await api(
+
+`${BASE}/${type}/${item.id}/videos?api_key=${API_KEY}&language=en-US`
+
+);
+
+
+const trailer = videos.results.find(v =>
+
+v.type==="Trailer" && v.site==="YouTube"
+
+);
+
+
+if(trailer){
+
+document.getElementById("trailer").innerHTML=
+
+`
+
+<iframe
+
+src="https://www.youtube.com/embed/${trailer.key}"
+
+allowfullscreen>
+
+</iframe>
+
+`;
+
+}else{
+
+document.getElementById("trailer").innerHTML=
+
+"<p>لا يوجد تريلر متوفر</p>";
+
+}
+
+
+}
+
+
+
+function closeModal(){
+
+document.getElementById("modal").style.display="none";
+
+}
+
+
+
+document.getElementById("searchBtn")
+
+.addEventListener("click",searchMovies);
+
+
+
+document.getElementById("search")
+
+.addEventListener("keypress",function(e){
+
+if(e.key==="Enter"){
+
+searchMovies();
+
+}
+
+});
+
+
+
+loadTrending();
+
+loadMovies();
+
+loadTV();
+
+loadTop();
+
+
+</script>
+
+
+
+
+
+
+</body>
+
+</html>
