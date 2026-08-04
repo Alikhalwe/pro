@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تجربة أفلام  مع مشغل  </title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #141414;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .search-box {
+            margin-bottom: 30px;
+        }
+        input[type="text"] {
+            padding: 12px;
+            width: 60%;
+            border: 1px solid #333;
+            background-color: #222;
+            color: white;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            padding: 12px 25px;
+            border: none;
+            background-color: #e50914;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+        button:hover {
+            background-color: #b81d24;
+        }
+        .results {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .movie-card {
+            background: #1f1f1f;
+            padding: 10px;
+            border-radius: 8px;
+            width: 160px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #333;
+        }
+        .movie-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(229, 9, 20, 0.4);
+        }
+        .movie-card img {
+            width: 100%;
+            height: 225px;
+            object-fit: cover;
+            border-radius: 4px;
+            background-color: #000;
+        }
+        .movie-card p {
+            font-size: 14px;
+            margin: 8px 0 0 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* قسم معلومات الفيلم المختار */
+        .info-container {
+            display: none;
+            background: #1f1f1f;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: right;
+            border: 1px solid #333;
+        }
+        .info-content {
+            display: flex;
+            gap: 20px;
+        }
+        .info-poster {
+            width: 150px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+        .info-text {
+            flex: 1;
+        }
+        .info-text h2 {
+            margin-top: 0;
+            color: #e50914;
+        }
+        .meta-data {
+            margin: 10px 0;
+            font-size: 14px;
+            color: #aaa;
+        }
+        .overview {
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        /* حاوية المشغل */
+        .player-container {
+            margin-top: 20px;
+            display: none;
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            background: #000;
+            border-radius: 8px;
+            border: 2px solid #333;
+        }
+        .player-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+<header>
+
+<div class="logo">
+
+🎬 تطوير علي خلوي
+
+</div>
+
+<nav>
+
+<a href="#">الرئيسية</a>
+
+<a href="#movies">أفلام</a>
+
+<a href="#tv">مسلسلات</a>
+
+<a href="#top">الأعلى تقييماً</a>
+
+</nav>
+
+<div class="right">
+
+
+</header>
+<div class="container">
+    <h1>برمجة وتطوير علــي (Crystal Ali)</h1>
+    
+    <!-- صندوق البحث -->
+    <div class="search-box">
+        <input type="text" id="query" placeholder="اكتب اسم الفيلم أو المسلسل هنا...">
+        <button onclick="searchMedia()">بحث</button>
+    </div>
+
+    <!-- نتائج البحث تظهر هنا -->
+    <div class="results" id="results"></div>
+
+    <!-- لوحة معلومات الفيلم المختار -->
+    <div class="info-container" id="info-box">
+        <div class="info-content">
+            <img class="info-poster" id="detail-poster" src="" alt="بوستر الفيلم">
+            <div class="info-text">
+                <h2 id="detail-title">اسم الفيلم</h2>
+                <div class="meta-data">
+                    <span id="detail-date">التاريخ</span> | 
+                    <span>⭐ <strong id="detail-rating">0.0</strong>/10</span>
+                </div>
+                <p class="overview" id="detail-overview">قصة الفيلم وتفاصيله ستظهر هنا...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- مشغل الفيديو -->
+    <div class="player-container" id="player-wrap">
+        <iframe id="vidfast-player" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    </div>
+</div>
+
+<script>
+    // الثوابت المطلوبة
+    const BASE = "https://api.themoviedb.org/3";
+    const TMDB_API_KEY = 'ef74cc8c3cb7f6100ffe47b9d59feada'; 
+    const VIDFAST_BASE_URL = 'https://vidfast.vc';
+    const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+
+    let currentResults = [];
+
+    async function searchMedia() {
+        const query = document.getElementById('query').value;
+        if (!query) return alert('الرجاء كتابة اسم البحث أولاً');
+
+        try {
+            // جلب البيانات باستخدام ثابت BASE
+            const response = await fetch(`${BASE}/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=ar`);
+            const data = await response.json();
+            currentResults = data.results;
+            displayResults(currentResults);
+        } catch (error) {
+            console.error('خطأ أثناء جلب البيانات من TMDB:', error);
+        }
+    }
+
+    function displayResults(results) {
+        const resultsContainer = document.getElementById('results');
+        resultsContainer.innerHTML = '';
+
+        if (!results || results.length === 0) {
+            resultsContainer.innerHTML = '<p>لم يتم العثور على نتائج. تأكد من صحة الاسم.</p>';
+            return;
+        }
+
+        results.forEach(item => {
+            if (item.media_type !== 'movie' && item.media_type !== 'tv') return;
+
+            const title = item.title || item.name;
+            const posterUrl = item.poster_path ? `${IMAGE_BASE_URL}${item.poster_path}` : 'https://placeholder.com';
+
+            const card = document.createElement('div');
+            card.className = 'movie-card';
+            card.onclick = () => showAndPlay(item.id, item.media_type);
+            card.innerHTML = `
+                <img src="${posterUrl}" alt="${title}" onerror="this.src='https://placeholder.com'">
+                <p title="${title}">${title}</p>
+            `;
+            resultsContainer.appendChild(card);
+        });
+    }
+
+    function showAndPlay(id, type) {
+        const item = currentResults.find(x => x.id === id && x.media_type === type);
+        if (!item) return;
+
+        const title = item.title || item.name;
+        const posterUrl = item.poster_path ? `${IMAGE_BASE_URL}${item.poster_path}` : 'https://placeholder.com';
+        const date = item.release_date || item.first_air_date || 'غير متوفر';
+        const overview = item.overview || 'لا يوجد وصف متاح لهذا العمل باللغة العربية حالياً.';
+        const rating = item.vote_average ? item.vote_average.toFixed(1) : '0.0';
+
+        document.getElementById('detail-title').innerText = title;
+        document.getElementById('detail-poster').src = posterUrl;
+        document.getElementById('detail-date').innerText = `تاريخ الإصدار: ${date}`;
+        document.getElementById('detail-rating').innerText = rating;
+        document.getElementById('detail-overview').innerText = overview;
+        document.getElementById('info-box').style.display = 'block';
+
+        const playerWrap = document.getElementById('player-wrap');
+        const iframe = document.getElementById('vidfast-player');
+
+        // صياغة الروابط الصحيحة لـ VidFast بناءً على التوثيق الفعلي:
+        // للأفلام: /movie/{id} | للمسلسلات: /tv/{id}/{season}/{episode}
+        let embedUrl = '';
+        if (type === 'movie') {
+            embedUrl = `${VIDFAST_BASE_URL}/movie/${id}`; 
+        } else if (type === 'tv') {
+            embedUrl = `${VIDFAST_BASE_URL}/tv/${id}/1/1`;
+        }
+
+        iframe.src = embedUrl;
+        playerWrap.style.display = 'block';
+        
+        document.getElementById('info-box').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+
+
+</body>
+</html>
