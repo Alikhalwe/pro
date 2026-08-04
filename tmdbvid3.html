@@ -279,36 +279,6 @@
     }
 </script>
 
-    <script>
-// 1. وظيفة زر الإغلاق لإخفاء المشغل وإلغاء مسافة الهامش فوراً
-function closeVideo() {
-    var video = document.getElementById("videoContainer");
-    if (video) {
-        video.style.display = "none"; 
-        document.body.style.paddingTop = "0px"; 
-    }
-}
-
-/* -------------------------------------------------------------
-   2. كود الأمان المطور: يسمح بروابط موقعك ويحظر إعلانات الفيديو
-------------------------------------------------------------- */
-var isInternalNavigation = false;
-
-// عند الضغط على أي رابط داخل الموقع، نخبر المتصفح أن هذا انتقال آمن ومسموح
-document.addEventListener('click', function(e) {
-    var anchor = e.target.closest('a');
-    if (anchor && anchor.getAttribute('href')) {
-        isInternalNavigation = true;
-    }
-});
-
-// تفعيل الحماية فقط إذا حاولت نافذة الفيديو (iframe) التوجيه قسراً دون نقرة من المستخدم
-window.onbeforeunload = function() {
-    if (!isInternalNavigation) {
-        return "هل أنت متأكد أنك تريد مغادرة الموقع؟";
-    }
-};
-</script>
 
 
 
