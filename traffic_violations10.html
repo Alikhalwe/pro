@@ -356,7 +356,8 @@
       return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
     }
     function amountInfo(record) {
-      const nextAmount = record.amount === 75 ? 100 : record.amount === 113 ? 150 : record.amount === 225 ? 300 : null;
+      const nextAmount = record.amount === 75 ? 100 : record.amount === 113 ? 150 : record.amount === 225 ? 300 :
+record.amount === 600 ? 800 : null;
       if (nextAmount === null) return {amount: record.amount, nextAmount: null, dueDate: null, changed: false};
       const dueDate = addDays(record.date, 49);
       const now = new Date();
