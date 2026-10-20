@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="جدول محلي قابل للبحث والتصفية للمخالفات المرورية المستخرجة من الصور المرفقة">
-  <title>سجل المخالفات المرورية معدل</title>
+  <title>سجل المخالفات المرورية</title>
   <style>
     :root {
       --teal: #078f83;
@@ -206,10 +206,10 @@
         <button class="btn-light" id="reset" type="button">مسح الفلاتر</button>
       </div>
       <div class="save-bar">
-        <span class="save-status" id="save-status" aria-live="polite">عند أول حفظ اختر مكان JSON؛ وعند فتح HTML لاحقًا استورد ملف JSON السابق.</span>
+        <span class="save-status" id="save-status" aria-live="polite">احفظ نسخة CSV كاملة بتاريخ اليوم، أو اربط ملف CSV/JSON لاستيراده وتحديثه لاحقًا.</span>
         <div class="save-actions">
           <button class="btn-light" id="import-data" type="button">استيراد / ربط ملف بيانات</button>
-          <input id="import-file" type="file" accept=".json,application/json" hidden>
+          <input id="import-file" type="file" accept=".csv,.json,text/csv,application/json" hidden>
           <button class="btn-primary" id="save-data" type="button">حفظ في ملف خارجي</button>
           <button class="btn-light" id="export" type="button" title="تصدير النتائج المطابقة للبحث والفلاتر بصيغة CSV متوافقة مع Excel">تصدير Excel (CSV)</button>
           <button class="btn-light" id="export-excel" type="button" title="تنزيل ملف Excel بالأعمدة والبيانات نفسها">تصدير Excel (.xls)</button>
@@ -274,6 +274,7 @@
     let storageAvailable = true;
     let externalFileHandle = null;
     let externalFileLoaded = false;
+    let externalFileFormat = "csv";
     let saved = null;
     let additions = [];
     try {
@@ -372,24 +373,107 @@
         seenIds.add(id);
       });
     }
-    async function readExternalHandle(handle) {
-      const file = await handle.getFile();
-      const state = JSON.parse(await file.text());
-      applyExternalState(state);
-      externalFileHandle = handle;
-      externalFileLoaded = true;
-      return state;
+    const externalCSVHeaders = ["رقم المخالفة", "تاريخ المخالفة", "المبلغ الأساسي", "نوع المخالفة", "موقع المخالفة", "السيارة", "اسم المستخدم", "حالة السداد", "الفئة", "مضافة يدويًا"];
+    function csvCell(value) {
+      let text = String(value ?? "");
+      if (/^[\t\r ]*[=+\-@]/.test(text)) text = "'" + text;
+      return `"${text.replaceAll('"', '""')}"`;
     }
-    function downloadExternalJSON(payload) {
-      const url = URL.createObjectURL(new Blob([payload], {type:"application/json;charset=utf-8"}));
+    function createExternalCSV() {
+      const rows = records.map((record) => [record.id, record.date, record.amount, record.type, record.location, record.car, record.user, record.status, record.category || "مخالفاتي", record.userAdded ? "نعم" : "لا"]);
+      return "\uFEFF" + [externalCSVHeaders, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
+    }
+    function parseCSV(text) {
+      const rows = [];
+      let row = [], field = "", quoted = false;
+      text = String(text).replace(/^\uFEFF/, "");
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (quoted) {
+          if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+          else if (ch === '"') quoted = false;
+          else field += ch;
+        } else if (ch === '"' && field === "") quoted = true;
+        else if (ch === ",") { row.push(field); field = ""; }
+        else if (ch === "\n" || ch === "\r") {
+          if (ch === "\r" && text[i + 1] === "\n") i++;
+          row.push(field); field = "";
+          if (row.some((cell) => cell !== "")) rows.push(row);
+          row = [];
+        } else field += ch;
+      }
+      if (field !== "" || row.length) { row.push(field); if (row.some((cell) => cell !== "")) rows.push(row); }
+      return rows;
+    }
+    function applyExternalCSV(text) {
+      const rows = parseCSV(text);
+      if (rows.length < 2) throw new Error("ملف CSV فارغ أو لا يحتوي على بيانات.");
+      const headers = rows[0].map((value) => value.trim());
+      const column = (...names) => names.map((name) => headers.indexOf(name)).find((index) => index >= 0) ?? -1;
+      const idCol = column("رقم المخالفة");
+      const dateCol = column("تاريخ المخالفة");
+      const amountCol = column("المبلغ الأساسي", "المبلغ");
+      if ([idCol, dateCol, amountCol].some((index) => index < 0)) throw new Error("تعذر استيراد CSV: يجب أن يتضمن أعمدة رقم المخالفة وتاريخ المخالفة والمبلغ الأساسي.");
+      const cols = {
+        type:column("نوع المخالفة"), location:column("موقع المخالفة"), car:column("السيارة"), user:column("اسم المستخدم"),
+        status:column("حالة السداد"), category:column("الفئة"), userAdded:column("مضافة يدويًا")
+      };
+      let imported = 0;
+      const seen = new Set();
+      rows.slice(1).forEach((values) => {
+        const value = (index) => index >= 0 ? String(values[index] ?? "").trim() : "";
+        const id = value(idCol).replace(/^'/, "");
+        const date = value(dateCol);
+        const amountText = value(amountCol).replace(/,/g, "");
+        const amount = Number(amountText);
+        if (!/^\d+$/.test(id) || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(amount) || seen.has(id)) return;
+        seen.add(id);
+        const existing = records.find((record) => record.id === id);
+        const status = value(cols.status);
+        const isAdded = ["نعم", "yes", "true", "1"].includes(value(cols.userAdded).toLowerCase());
+        const next = existing || {category:"مخالفاتي", type:"مخالفة مرورية", date, id, amount, location:"", car:"", user:"", status:"", userAdded:true};
+        next.date = date;
+        next.amount = amount;
+        if (cols.type >= 0 && value(cols.type)) next.type = value(cols.type);
+        if (cols.location >= 0) next.location = value(cols.location);
+        if (cols.car >= 0) next.car = value(cols.car);
+        if (cols.user >= 0) next.user = value(cols.user);
+        if (cols.status >= 0) next.status = statusValues.includes(status) ? status : "";
+        if (cols.category >= 0 && value(cols.category)) next.category = value(cols.category);
+        if (!existing) next.userAdded = cols.userAdded >= 0 ? isAdded : true;
+        if (!existing) records.push(next);
+        else if (isAdded) existing.userAdded = true;
+        imported++;
+      });
+      if (!imported) throw new Error("لم يتم العثور على صفوف صحيحة في ملف CSV. تحقق من رقم المخالفة والتاريخ والمبلغ.");
+      return imported;
+    }
+    function fileDate() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    }
+    function downloadExternalFile(payload, format) {
+      const mime = format === "csv" ? "text/csv;charset=utf-8" : "application/json;charset=utf-8";
+      const url = URL.createObjectURL(new Blob([payload], {type:mime}));
       const link = document.createElement("a");
       link.href = url;
-      link.download = "traffic_violations_data.json";
+      link.download = `traffic_violations_data_${fileDate()}.${format}`;
       link.click();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
+    async function readExternalHandle(handle) {
+      const file = await handle.getFile();
+      externalFileFormat = file.name.toLowerCase().endsWith(".json") ? "json" : "csv";
+      const text = await file.text();
+      if (externalFileFormat === "csv") applyExternalCSV(text);
+      else applyExternalState(JSON.parse(text));
+      externalFileHandle = handle;
+      externalFileLoaded = true;
+      return text;
+    }
     async function saveExternalData() {
-      const payload = JSON.stringify(createExternalState(), null, 2);
+      externalFileFormat = externalFileFormat || "csv";
+      const payload = externalFileFormat === "csv" ? createExternalCSV() : JSON.stringify(createExternalState(), null, 2);
       if (externalFileHandle && externalFileLoaded && typeof externalFileHandle.createWritable === "function") {
         const permission = await externalFileHandle.requestPermission({mode:"readwrite"});
         if (permission !== "granted") throw new Error("إذن الكتابة غير متاح؛ أعد ربط ملف البيانات أولًا.");
@@ -400,9 +484,11 @@
       }
       if (externalFileHandle && !externalFileLoaded) throw new Error("أعد ربط ملف البيانات واستعده قبل الحفظ.");
       if (typeof window.showSaveFilePicker === "function") {
+        const extension = externalFileFormat;
+        const mime = extension === "csv" ? "text/csv" : "application/json";
         const handle = await window.showSaveFilePicker({
-          suggestedName:"traffic_violations_data.json",
-          types:[{description:"ملف بيانات المخالفات (JSON)", accept:{"application/json":[".json"]}}]
+          suggestedName:`traffic_violations_data_${fileDate()}.${extension}`,
+          types:[{description:extension === "csv" ? "ملف بيانات المخالفات (CSV)" : "ملف بيانات المخالفات (JSON)", accept:{[mime]:[`.${extension}`]}}]
         });
         externalFileHandle = handle;
         externalFileLoaded = true;
@@ -411,7 +497,7 @@
         await writable.close();
         return "written";
       }
-      downloadExternalJSON(payload);
+      downloadExternalFile(payload, externalFileFormat);
       return "downloaded";
     }
 
@@ -549,7 +635,8 @@ record.amount === 600 ? 800 : null;
       } catch (error) { storageAvailable = false; }
       try {
         const result = await saveExternalData();
-        $("#save-status").textContent = result === "written" ? "تم حفظ البيانات والتعديلات في ملف JSON الخارجي. استورده عند فتح الصفحة لاحقًا." : "تم تنزيل ملف JSON خارجي؛ استبدل به الملف السابق ثم استورده عند فتح الصفحة لاحقًا.";
+        const formatName = externalFileFormat.toUpperCase();
+        $("#save-status").textContent = result === "written" ? `تم حفظ البيانات كاملة في ملف ${formatName} الخارجي؛ أعد ربطه بعد فتح الصفحة لاحقًا.` : `تم تنزيل ملف ${formatName} كامل بتاريخ اليوم؛ استورده عند فتح الصفحة لاحقًا.`;
       } catch (error) {
         $("#save-status").textContent = error.name === "AbortError" ? "أُلغي اختيار ملف البيانات؛ لم يتغير الملف الخارجي." : (error.message || "تعذر حفظ الملف الخارجي.");
       }
@@ -562,14 +649,14 @@ record.amount === 600 ? 800 : null;
           if (permission === "granted") handle = externalFileHandle;
         }
         if (!handle && typeof window.showOpenFilePicker === "function") {
-          const handles = await window.showOpenFilePicker({multiple:false, types:[{description:"ملف بيانات المخالفات (JSON)", accept:{"application/json":[".json"]}}]});
+          const handles = await window.showOpenFilePicker({multiple:false, types:[{description:"ملف بيانات المخالفات (CSV أو JSON)", accept:{"text/csv":[".csv"], "application/json":[".json"]}}]});
           handle = handles[0];
         }
         if (handle) {
           await readExternalHandle(handle);
           try { persistRecords(); } catch (error) {}
           refreshStatusFilter(); render();
-          $("#save-status").textContent = "تم استيراد وربط ملف JSON الخارجي؛ احفظ التعديلات لتحديثه.";
+          $("#save-status").textContent = `تم استيراد وربط ملف ${externalFileFormat.toUpperCase()} الخارجي؛ احفظ التعديلات لتحديثه.`;
           return;
         }
         $("#import-file").click();
@@ -582,14 +669,17 @@ record.amount === 600 ? 800 : null;
       const file = event.target.files && event.target.files[0];
       if (!file) return;
       try {
-        applyExternalState(JSON.parse(await file.text()));
+        const text = await file.text();
+        externalFileFormat = file.name.toLowerCase().endsWith(".json") ? "json" : "csv";
+        if (externalFileFormat === "csv") applyExternalCSV(text);
+        else applyExternalState(JSON.parse(text));
         externalFileHandle = null;
         externalFileLoaded = false;
         try { persistRecords(); } catch (error) {}
         refreshStatusFilter(); render();
-        $("#save-status").textContent = "تم استيراد ملف JSON؛ اضغط حفظ لربطه أو تنزيل ملف بيانات محدث.";
+        $("#save-status").textContent = `تم استيراد ملف ${externalFileFormat.toUpperCase()}؛ اضغط حفظ لتنزيل نسخة محدثة بتاريخ اليوم.`;
       } catch (error) {
-        $("#save-status").textContent = error.message || "تعذر قراءة ملف JSON.";
+        $("#save-status").textContent = error.message || "تعذرت قراءة ملف CSV أو JSON.";
       } finally { event.target.value = ""; }
     });
     $("#add-record-form").addEventListener("submit", (event) => {
@@ -607,10 +697,10 @@ record.amount === 600 ? 800 : null;
       records.push(record);
       try {
         persistRecords();
-        $("#save-status").textContent = "أُضيفت المخالفة محليًا مؤقتًا؛ احفظها في ملف JSON الخارجي.";
-        $("#add-message").textContent = "أُضيفت المخالفة؛ اضغط حفظ في ملف خارجي للاحتفاظ بها.";
+        $("#save-status").textContent = "أُضيفت المخالفة محليًا مؤقتًا؛ احفظها في الملف الخارجي (CSV).";
+        $("#add-message").textContent = "أُضيفت المخالفة؛ اضغط حفظ في ملف خارجي CSV للاحتفاظ بها.";
       } catch (error) {
-        $("#add-message").textContent = "أُضيفت في الصفحة؛ اضغط حفظ في ملف خارجي للاحتفاظ بها.";
+        $("#add-message").textContent = "أُضيفت في الصفحة؛ اضغط حفظ في ملف خارجي CSV للاحتفاظ بها.";
       }
       refreshStatusFilter(); render();
       event.target.reset();
