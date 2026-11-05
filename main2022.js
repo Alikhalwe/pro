@@ -1,4 +1,4 @@
-var dealinguri = "https://numberbouk.net/h1";
+var dealinguri = "https://numberbouk.net/h1_sugg";
 var suggestions_dealinguri = "https://numberbouk.net/h1";
 var dealingurie = "https://raw.githubusercontent.com/Alikhalwe/pro/master";
 var dealingurib = "https://raw.githubusercontent.com/Alikhalwe/pro/master";
