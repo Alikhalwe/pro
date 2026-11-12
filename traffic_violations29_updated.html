@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="جدول محلي قابل للبحث والتصفية للمخالفات المرورية المستخرجة من الصور المرفقة">
+  <title>سجل المخالفات المرورية</title>
+  <style>
+    :root {
+      --teal: #078f83;
+      --teal-dark: #08796f;
+      --teal-soft: #e9f6f4;
+      --ink: #172b2a;
+      --muted: #647775;
+      --line: #e4eceb;
+      --surface: #ffffff;
+      --canvas: #f3f7f6;
+      --warn-bg: #fff4e8;
+      --warn-ink: #a3530a;
+      --shadow: 0 12px 34px rgba(25, 69, 65, .08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: "Noto Sans Arabic", "Noto Kufi Arabic", Tahoma, Arial, sans-serif;
+      line-height: 1.65;
+    }
+    .page { width: min(1440px, calc(100% - 40px)); margin: 34px auto 50px; }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 30px 34px;
+      border-radius: 22px;
+      color: #fff;
+      background: linear-gradient(120deg, #08796f, #079b8d 68%, #13a99b);
+      box-shadow: var(--shadow);
+    }
+    .hero::after {
+      content: ""; position: absolute; width: 240px; height: 240px;
+      left: -54px; top: -120px; border: 1px solid rgba(255,255,255,.18);
+      border-radius: 50%; box-shadow: 0 0 0 28px rgba(255,255,255,.045), 0 0 0 58px rgba(255,255,255,.035);
+    }
+    .eyebrow { margin: 0 0 5px; color: rgba(255,255,255,.78); font-size: 14px; }
+    h1 { margin: 0; font-size: clamp(25px, 4vw, 36px); letter-spacing: -.3px; }
+    .hero p:last-child { margin: 8px 0 0; color: rgba(255,255,255,.88); }
+    .summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin: 18px 0 12px; }
+    .stat {
+      padding: 16px 19px; background: var(--surface); border: 1px solid var(--line);
+      border-radius: 16px; box-shadow: 0 5px 18px rgba(22, 63, 59, .035);
+    }
+    .stat-label { color: var(--muted); font-size: 13px; }
+    .stat-value { margin-top: 2px; color: var(--teal-dark); font-size: 23px; font-weight: 800; }
+    .stat-paid .stat-value { color: #16804a; }
+    .stat-unpaid .stat-value { color: #c62828; }
+    .stat-breakdown { grid-column:span 1; }
+    .status-count-list { display:grid; gap:7px; margin-top:8px; }
+    .status-count-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding-top:6px; border-top:1px solid #edf1f0; font-size:12px; }
+    .status-count-row strong { font-size:16px; }
+    .count-paid, .legend-paid { color:#16804a; font-weight:800; }
+    .count-deducted, .legend-deducted { color:#946500; font-weight:800; }
+    .count-unpaid, .legend-unpaid { color:#c62828; font-weight:800; }
+    .payment-dashboard { margin: 0 0 18px; padding: 17px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 5px 18px rgba(22,63,59,.035); }
+    .dashboard-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
+    .dashboard-head h2 { margin:0; font-size:16px; }
+    .dashboard-head span { color:var(--muted); font-size:12px; }
+    .payment-track { display:flex; height:13px; overflow:hidden; border-radius:999px; background:#f3e6d6; direction:rtl; }
+    .payment-paid-bar { flex:none; width:0; background:#25a568; transition:width .35s ease; }
+    .payment-deducted-bar { flex:none; width:0; background:#f0c23e; transition:width .35s ease; }
+    .payment-unpaid-bar { flex:1; background:#d64545; transition:width .35s ease; }
+    .payment-legend { display:flex; justify-content:space-between; gap:12px; margin-top:10px; color:var(--muted); font-size:12px; flex-wrap:wrap; }
+    .legend-deducted { color:#946500; font-weight:700; }
+    .cell-input.status-paid { border:2px solid #42a96b; background:#d9f4e2; color:#126b38; -webkit-text-fill-color:#126b38; font-weight:900; }
+    .cell-input.status-unpaid { border:2px solid #dc5a5a; background:#ffe1e1; color:#a71919; -webkit-text-fill-color:#a71919; font-weight:900; }
+    .cell-input.status-paid:disabled { border:2px solid #42a96b; background:#d9f4e2; color:#126b38; -webkit-text-fill-color:#126b38; }
+    .cell-input.status-unpaid:disabled { border:2px solid #dc5a5a; background:#ffe1e1; color:#a71919; -webkit-text-fill-color:#a71919; }
+    .print-cell.status-paid { color:#147a3f; font-weight:800; }
+    .print-cell.status-unpaid { color:#b42323; font-weight:800; }
+    .print-cell.status-deducted { color:#946500; font-weight:800; }
+    .cell-input.status-deducted { border:2px solid #d9a915; background:#fff3bd; color:#795600; -webkit-text-fill-color:#795600; font-weight:900; }
+    .cell-input.status-deducted:disabled { border:2px solid #d9a915; background:#fff3bd; color:#795600; -webkit-text-fill-color:#795600; }
+    .date-cell { text-align:center; }
+    .violation-time { display:block; margin-top:2px; color:#536461; font-size:12px; font-weight:700; direction:ltr; unicode-bidi:isolate; }
+    .duration-note { font-size:10px; }
+    .location-marquee { width:100%; max-width:100%; overflow:hidden; white-space:nowrap; direction:rtl; text-align:right; }
+    .location-marquee-text { display:inline-block; white-space:nowrap; }
+    .location-marquee.is-long .location-marquee-text { animation: location-scroll var(--scroll-duration, 6s) linear infinite alternate; }
+    @keyframes location-scroll { from { transform:translateX(0); } to { transform:translateX(var(--scroll-distance)); } }
+    @media (prefers-reduced-motion: reduce) { .location-marquee.is-long .location-marquee-text { animation:none; } }
+    .car-quick-filter { width:100%; min-height:0; padding:0; border:0; border-radius:0; background:transparent; color:inherit; white-space:normal; }
+    .car-quick-filter:hover { background:transparent; color:var(--teal-dark); text-decoration:underline; }
+    .user-input { text-align:center; }
+    .back-to-top { position:fixed; right:18px; bottom:20px; z-index:20; display:none; width:auto; min-height:44px; padding:10px 15px; border:0; border-radius:999px; background:#087f75; color:#fff; box-shadow:0 5px 18px rgba(0,0,0,.2); }
+    .back-to-top.visible { display:inline-flex; align-items:center; gap:6px; }
+    .back-to-top:hover { background:#06645d; }
+    .panel { overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: 19px; box-shadow: var(--shadow); }
+    .panel-head { padding: 21px 23px 0; }
+    .panel-head h2 { margin: 0; font-size: 20px; }
+    .panel-head p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+    .filters {
+      display: grid; grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(125px, 1fr)) auto;
+      align-items: end; gap: 11px; padding: 18px 23px 20px;
+    }
+    .filter-heading { grid-column: 1 / -1; display:flex; align-items:baseline; gap:10px; margin-bottom:-3px; color:var(--teal-dark); font-size:14px; font-weight:800; }
+    .filter-heading small { color:var(--muted); font-size:12px; font-weight:500; }
+    .field label { display: block; margin-bottom: 5px; color: #45615e; font-size: 13px; font-weight: 700; }
+    input, select, button {
+      min-height: 43px; width: 100%; padding: 9px 12px; border: 1px solid #d7e3e1;
+      border-radius: 10px; background: #fff; color: var(--ink); font: inherit; font-size: 14px;
+    }
+    input:focus, select:focus, button:focus-visible { outline: 3px solid rgba(7,143,131,.18); border-color: var(--teal); }
+    button { width: auto; white-space: nowrap; cursor: pointer; font-weight: 700; transition: .15s ease; }
+    .btn-primary { background: var(--teal); border-color: var(--teal); color: white; }
+    .btn-primary:hover { background: var(--teal-dark); }
+    .btn-light { background: #f7faf9; }
+    .btn-light:hover { background: var(--teal-soft); }
+    .toolbar-note { padding: 0 23px 14px; color: var(--muted); font-size: 13px; }
+    .table-wrap { overflow-x: auto; border-top: 1px solid var(--line); }
+    table { width: 100%; min-width: 1150px; table-layout: fixed; border-collapse: collapse; text-align: right; }
+    col.col-date { width: 112px; }
+    col.col-id { width: 128px; }
+    col.col-type { width: 132px; }
+    col.col-amount { width: 140px; }
+    col.col-location { width: 145px; }
+    col.col-car { width: 170px; }
+    col.col-user { width: 155px; }
+    col.col-status { width: 122px; }
+    thead th, tbody td { overflow-wrap: anywhere; }
+    thead th {
+      position: sticky; top: 0; z-index: 1; padding: 14px 13px; color: white;
+      background: var(--teal); font-size: 13px; font-weight: 700; white-space: nowrap;
+    }
+    thead th button { min-height: 0; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; }
+    thead th button:hover { text-decoration: underline; }
+    tbody td { padding: 8px 6px; border-bottom: 1px solid #edf1f0; vertical-align: middle; font-size: 14px; min-width:0; overflow:hidden; }
+    tbody tr:nth-child(even) { background: #f7f9f8; }
+    tbody tr:hover { background: #eef8f6; }
+    .number { direction: ltr; unicode-bidi: isolate; display: inline-block; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; background: var(--teal-soft); color: var(--teal-dark); font-size: 12px; font-weight: 800; white-space: nowrap; }
+    .badge-unpaid { background: var(--warn-bg); color: var(--warn-ink); }
+    .missing { color: #889694; font-size: 13px; white-space: nowrap; }
+    .cell-input { direction: rtl; text-align: right; width: 100%; max-width: 124px; min-width: 82px; min-height: 34px; padding: 5px 7px; background: #fff; color: #203432; font-size: 13px; font-weight: 600; }
+    .cell-input:disabled { opacity: 1; cursor: default; background: #f3f6f5; color: #364b48; -webkit-text-fill-color:#364b48; }
+    .vehicle-cell { display:grid; justify-items:center; align-content:center; gap:6px; width:100%; min-width:0; max-width:160px; margin-inline:auto; text-align:center; }
+    .vehicle-name { display:block; width:100%; color:#667572; font-size:15px; line-height:1.4; font-weight:800; text-align:center; }
+    .vehicle-select { max-width:145px !important; min-width:120px !important; color:#53615f; }
+    .saudi-plate[hidden] { display:none; }
+    .saudi-plate { display:grid; grid-template-columns:1fr 1fr; direction:ltr; align-items:center; width:100%; min-width:124px; max-width:150px; min-height:37px; overflow:hidden; border:2px solid #475552; border-radius:5px; background:#fff; color:#182523; box-shadow:0 1px 2px rgba(0,0,0,.12); }
+    .plate-numbers, .plate-letters { display:flex; align-items:center; justify-content:center; min-height:30px; padding:3px 4px; font-size:13px; font-weight:900; white-space:nowrap; }
+    .plate-numbers { border-right:1px solid #9ca6a4; direction:ltr; letter-spacing:.04em; }
+    .plate-letters { direction:rtl; letter-spacing:.02em; }
+    .vehicle-preview { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:7px 0; }
+    .vehicle-preview .saudi-plate { max-width:175px; }
+    .vehicle-preview-label { color:#74817f; font-size:12px; }
+    .car-print-name { display:block; width:100%; color:#667572; font-size:14px; line-height:1.4; font-weight:800; text-align:center; margin-bottom:1px; }
+    .car-print-plate { display:block; }
+    .type-input { display:block; width:100%; max-width:116px; min-width:0; margin-inline:auto; text-align:center; }
+    select.cell-input { width:100%; max-width:112px; min-width:0; margin-inline:auto; }
+    .cell-input[data-edit-field="status"] { min-width:0; padding-inline:4px; text-align:center; font-size:12px; }
+    .edit-active { box-shadow: 0 0 0 3px rgba(7,143,131,.15); }
+    .edit-control-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:14px 22px 18px; padding:12px 15px; border:1px solid #f1d39b; border-radius:12px; background:#fff9ed; }
+    .edit-warning { color:#805814; font-size:13px; }
+    .delete-column, .delete-record { display:none; }
+    table.editing .delete-column, table.editing .delete-record { display:table-cell; }
+    .delete-record { min-height:32px; padding:4px 10px; border-color:#d33; background:#fff1f1; color:#b42323; font-size:12px; }
+    .delete-record:hover { background:#ffe0e0; }
+    .duration-note { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; white-space: nowrap; }
+    .save-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 23px 0; flex-wrap: wrap; }
+    .save-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .save-status { color: var(--muted); font-size: 13px; }
+    .amount { font-weight: 800; text-align:center; white-space:normal; }
+    .amount > .number { font-size:15px; }
+    .amount-note { display:block; width:100%; max-width:100%; margin:4px auto 0; color:#805814; font-size:10px; line-height:1.4; font-weight:500; white-space:normal; overflow-wrap:anywhere; text-align:center; }
+    .amount-note .number { display:inline-block; white-space:nowrap; }
+    .amount-note.changed { color: var(--teal-dark); }
+    .empty { padding: 34px 18px; text-align: center; color: var(--muted); }
+    .table-foot { display: flex; justify-content: space-between; gap: 12px; padding: 13px 22px; color: var(--muted); font-size: 13px; }
+    .source-note { margin: 15px 2px 0; padding: 13px 16px; border-right: 3px solid #e2a34f; border-radius: 9px; background: #fffaf3; color: #73532e; font-size: 13px; }
+    .add-panel { margin: 0 22px 20px; border: 1px solid var(--line); border-radius: 13px; background: #fbfdfc; }
+    .add-panel summary { padding: 14px 16px; color: var(--teal-dark); cursor: pointer; font-weight: 800; }
+    .add-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 0 16px 16px; }
+    .add-form .field label { display: block; margin-bottom: 5px; color: #45615e; font-size: 13px; font-weight: 700; }
+    .add-form .form-actions { display: flex; align-items: center; gap: 12px; grid-column: 1 / -1; }
+    .form-message { color: #a3530a; font-size: 13px; }
+    .footer { margin-top: 16px; color: #788985; text-align: center; font-size: 12px; }
+    @media print {
+      @page { size: landscape; margin: 12mm; }
+      body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .page { width: 100%; margin: 0; }
+      .hero { padding: 14px 20px; box-shadow: none; }
+      .summary { margin: 10px 0; }
+      .filters, .save-bar, .toolbar-note, .add-panel, .source-note, .footer, .table-foot, .edit-control-bar, .delete-column, .delete-record { display: none !important; }
+      .panel { border: 0; box-shadow: none; }
+      .panel-head { padding: 8px 0; }
+      .table-wrap { overflow: visible; }
+      table { min-width: 1150px; width: 100%; table-layout: fixed; font-size: 9pt; }
+      thead { display: table-header-group; }
+      thead th { position: static; }
+      tbody tr { break-inside: avoid; }
+      tbody td { padding: 5px 4px; font-size: 9pt; overflow:visible; }
+      .amount-note { font-size:8pt; white-space:normal; }
+      .cell-input { min-height: 0; width: 100%; min-width: 0; padding: 0; border: 0; background: transparent; color: #172b2a; font-size: 9pt; appearance: none; }
+      select.cell-input { background-image: none; }
+      .print-cell { display: inline; color: #172b2a; white-space: normal; overflow-wrap: anywhere; }
+    }
+    @media (max-width: 1100px) { .summary { grid-template-columns: repeat(3, minmax(0, 1fr)); } .filters { grid-template-columns: repeat(3, minmax(0, 1fr)); } .field-search, .filter-heading { grid-column: 1 / -1; } }
+    @media (max-width: 640px) {
+      .page { width: min(100% - 22px, 1440px); margin: 12px auto 28px; }
+      .hero { padding: 23px 20px; border-radius: 16px; }
+      .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin: 11px 0; }
+      .stat-breakdown { grid-column:1 / -1; }
+      .stat { padding: 13px; } .stat-value { font-size: 20px; }
+      .payment-dashboard { padding: 14px; }
+      .dashboard-head { align-items:flex-start; flex-direction:column; gap:2px; }
+      .panel-head { padding-inline: 16px; }
+      .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 15px 16px; }
+      .field-search { grid-column: span 2; }
+      .filters button { width: 100%; }
+      .add-panel { margin-inline: 12px; }
+      .add-form { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-inline: 12px; }
+      .add-form .form-actions { flex-wrap: wrap; }
+      .toolbar-note { padding-inline: 16px; }
+      .table-foot { padding-inline: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">لوحة متابعة شخصية</p>
+      <h1>سجل المخالفات المرورية</h1>
+      <p>استورد ملف CSV أو JSON لعرض المخالفات وإدارتها والبحث فيها وتصديرها.</p>
+    </header>
+
+    <section class="summary" aria-label="لوحة إحصائيات المخالفات">
+      <div class="stat"><div class="stat-label">إجمالي المخالفات</div><div class="stat-value" id="total-count">0</div></div>
+      <div class="stat"><div class="stat-label">إجمالي المبالغ الحالية</div><div class="stat-value"><span id="total-amount">0</span></div></div>
+      <div class="stat stat-paid"><div class="stat-label">إجمالي المسدد</div><div class="stat-value"><span id="paid-amount">0</span></div></div>
+      <div class="stat stat-unpaid"><div class="stat-label">المتبقي غير المسدد</div><div class="stat-value"><span id="unpaid-amount">0</span></div></div>
+      <div class="stat stat-breakdown"><div class="stat-label">تفصيل حالات المخالفات المعروضة</div><div class="status-count-list">
+        <div class="status-count-row count-paid"><span>تم السداد</span><strong id="count-paid">0</strong></div>
+        <div class="status-count-row count-deducted"><span>تم الحسم</span><strong id="count-deducted">0</strong></div>
+        <div class="status-count-row count-unpaid"><span>لم تسدد</span><strong id="count-unpaid">0</strong></div>
+      </div></div>
+    </section>
+    <section class="payment-dashboard" aria-label="ملخص حالة السداد">
+      <div class="dashboard-head"><h2>ملخص حالة السداد</h2><span id="payment-ratio">لم يُسجّل سداد بعد</span></div>
+      <div class="payment-track" role="img" aria-label="توزيع حالات السداد والحسم"><div class="payment-paid-bar" id="paid-bar"></div><div class="payment-deducted-bar" id="deducted-bar"></div><div class="payment-unpaid-bar" id="unpaid-bar"></div></div>
+      <div class="payment-legend"><span class="legend-paid" id="paid-count">المسددة: 0 مخالفة</span><span class="legend-deducted" id="deducted-count">تم الحسم: 0 مخالفة</span><span class="legend-unpaid" id="unpaid-count">غير المسددة: 0 مخالفة</span></div>
+    </section>
+
+    <section class="panel" aria-labelledby="table-title">
+      <div class="panel-head">
+        <h2 id="table-title">تفاصيل المخالفات</h2>
+        <p>استخدم البحث المتقدم للجمع بين السيارة وحالة السداد والتاريخ، أو ابحث في جميع حقول المخالفة.</p>
+      </div>
+      <div class="filters" role="search" aria-label="البحث المتقدم في المخالفات">
+        <div class="filter-heading">البحث المتقدم <small>يمكن الجمع بين السيارة وحالة السداد والفترة الزمنية</small></div>
+        <div class="field field-search">
+          <label for="search">بحث في جميع الحقول</label>
+          <input id="search" type="search" placeholder="ابحث برقم المخالفة أو النوع أو الحالة…" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="status-filter">الحالة</label>
+          <select id="status-filter"><option value="">كل الحالات</option></select>
+        </div>
+        <div class="field">
+          <label for="car-filter">السيارة</label>
+          <select id="car-filter"><option value="">كل السيارات</option><option value="هافال">هافال</option><option value="هايلكس">هايلكس</option><option value="كامري">كامري</option></select>
+        </div>
+        <div class="field">
+          <label for="from-date">من تاريخ</label>
+          <input id="from-date" type="date" min="2026-07-05" max="2026-09-21">
+        </div>
+        <div class="field">
+          <label for="to-date">إلى تاريخ</label>
+          <input id="to-date" type="date" min="2026-07-05" max="2026-09-21">
+        </div>
+        <button class="btn-light" id="reset" type="button">مسح الفلاتر</button>
+      </div>
+      <div class="save-bar">
+        <span class="save-status" id="save-status" aria-live="polite">استورد CSV أو JSON، ويمكن استعادة مخالفة محذوفة باستيراد ملف Recovery الخاص بها.</span>
+        <div class="save-actions">
+          <button class="btn-light" id="import-data" type="button">استيراد / ربط ملف بيانات</button>
+          <input id="import-file" type="file" accept=".csv,.json,text/csv,application/json" hidden>
+          <button class="btn-primary" id="save-data" type="button" title="حفظ نسخة CSV كاملة قابلة للتعديل بتاريخ اليوم">حفظ البيانات CSV</button>
+          <button class="btn-light" id="save-json" type="button" title="تنزيل نسخة JSON كاملة بتاريخ اليوم">حفظ البيانات JSON</button>
+          <button class="btn-light" id="export" type="button" title="تصدير النتائج المطابقة للبحث والفلاتر بصيغة CSV متوافقة مع Excel">تصدير Excel (CSV)</button>
+          <button class="btn-light" id="export-excel" type="button" title="تنزيل ملف Excel بالأعمدة والبيانات نفسها">تصدير Excel (.xls)</button>
+          <button class="btn-primary" id="export-pdf" type="button" title="طباعة النتائج أو حفظها بصيغة PDF">تصدير PDF</button>
+        </div>
+      </div>
+      <div class="toolbar-note" id="result-count" aria-live="polite">جارٍ تجهيز النتائج…</div>
+      <div class="table-wrap">
+        <table>
+          <colgroup>
+            <col class="col-date"><col class="col-id"><col class="col-type"><col class="col-amount">
+            <col class="col-location"><col class="col-car"><col class="col-user"><col class="col-status">
+          </colgroup>
+          <thead><tr>
+            <th><button type="button" data-sort="date">تاريخ المخالفة ↕</button></th>
+            <th><button type="button" data-sort="id">رقم المخالفة ↕</button></th>
+            <th><button type="button" data-sort="type">نوع المخالفة ↕</button></th>
+            <th><button type="button" data-sort="amount">المبلغ ↕</button></th>
+            <th>موقع المخالفة</th><th>السيارة</th><th>اسم المستخدم</th><th>الحالة</th><th class="delete-column">إجراء</th>
+          </tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div class="table-foot"><span>اضغط اسم السيارة لتصفية جميع مخالفاتها؛ الإحصاءات تتبع النتائج المعروضة</span><span>إذا لم يتضمن الملف وقت المخالفة فسيظهر «غير مسجل»</span></div>
+      <div class="edit-control-bar">
+        <span class="edit-warning" id="edit-warning">تنبيه: وضع التعديل يتيح تغيير البيانات وحذف المخالفات. سيطلب الرمز السري، ويُطلب تأكيد مستقل قبل كل حذف.</span>
+        <button class="btn-light" id="edit-mode" type="button" aria-pressed="false">تعديل المخالفات</button>
+      </div>
+      <details class="add-panel" id="add-panel">
+        <summary>＋ إضافة مخالفة جديدة</summary>
+        <form class="add-form" id="add-record-form">
+          <div class="field"><label for="new-type">نوع المخالفة</label><input id="new-type" name="type" type="text" required></div>
+          <div class="field"><label for="new-date">تاريخ المخالفة</label><input id="new-date" name="date" type="date" required></div>
+          <div class="field"><label for="new-time">وقت المخالفة</label><input id="new-time" name="time" type="time" required></div>
+          <div class="field"><label for="new-id">رقم المخالفة</label><input id="new-id" name="id" type="text" inputmode="numeric" pattern="[0-9]+" title="أدخل أرقامًا فقط" required></div>
+          <div class="field"><label for="new-amount">المبلغ</label><input id="new-amount" name="amount" type="number" min="0" step="1" required></div>
+          <div class="field"><label for="new-location">الموقع</label><input id="new-location" name="location" type="text"></div>
+          <div class="field"><label for="new-car">نوع السيارة ولوحتها</label><select id="new-car" name="car" required><option value="">اختر السيارة</option><option value="هافال">هافال</option><option value="هايلكس">هايلكس</option><option value="كامري">كامري</option></select></div>
+          <div class="field"><label>لوحة السيارة</label><div class="vehicle-preview"><span class="vehicle-preview-label" id="new-plate-car-name">اختر السيارة لعرض لوحتها</span><span id="new-plate-preview" class="saudi-plate" hidden><span class="plate-numbers" id="new-plate-numbers" dir="ltr">—</span><span class="plate-letters" id="new-plate-letters" dir="rtl">—</span></span></div><input id="new-plate" name="plate" type="hidden"></div>
+          <div class="field"><label for="new-user">اسم المستخدم</label><input id="new-user" name="user" type="text"></div>
+          <div class="field"><label for="new-status">الحالة</label><select id="new-status" name="status"><option value="">اختر الحالة</option><option value="تم السداد">تم السداد</option><option value="تم الحسم">تم الحسم</option><option value="لم تسدد">لم تسدد</option></select></div>
+          <div class="form-actions"><button class="btn-primary" type="submit">إضافة المخالفة</button><span class="form-message" id="add-message" aria-live="polite"></span></div>
+        </form>
+      </details>
+    </section>
+    <aside class="source-note"><strong>قاعدة التعديل:</strong> وفق طلبك، يعتمد الحساب على المبلغ الأصلي للمخالفة: 75 تصبح 100، و113 تصبح 150، و225 تصبح 300 بعد مرور 49 يومًا من تاريخها. يعرض الجدول موعد التغيير ويحدّث المبلغ والإجمالي تلقائيًا اعتمادًا على تاريخ جهازك. نوع المخالفة والموقع والسيارة واسم المستخدم قابلة للتعديل، ولوحة كل سيارة ثابتة وفق البيانات المحددة؛ الحالة تُختار من القائمة.</aside>
+    <footer class="footer">يُحفظ سجل التعديلات في ملف JSON خارجي منفصل عن HTML. عند فتح HTML لاحقًا، استورد ملف JSON السابق أولًا. قد يطلب المتصفح اختيار الملف أو السماح بالوصول إليه؛ وفي المتصفحات التي لا تدعم الكتابة المباشرة سيُنزل JSON جديد لتستبدل به النسخة القديمة.</footer>
+    <button class="back-to-top" id="back-to-top" type="button" aria-label="العودة إلى أعلى الصفحة">↑ العودة للأعلى</button>
+  </main>
+
+  <script>
+    "use strict";
+    // يبدأ السجل فارغًا؛ تُحمّل البيانات عند استيراد CSV أو JSON.
+    const records = [];
+    const editableFields = ["type", "location", "car", "plate", "user", "status"];
+    const vehicleOptions = ["هافال", "هايلكس", "كامري"];
+    const vehiclePlates = {
+      "هافال": {letters:"س ر ح", numbers:"7339"},
+      "هايلكس": {letters:"ب ر د", numbers:"4476"},
+      "كامري": {letters:"ب ص ي", numbers:"5350"}
+    };
+    function normalizePlate(value) { return String(value || "").trim().replace(/\s+/g, " "); }
+    function plateValueForCar(car) {
+      const plate = vehiclePlates[car];
+      return plate ? `${plate.letters} ${plate.numbers}` : "";
+    }
+    function plateParts(car, value) {
+      if (vehiclePlates[car]) return vehiclePlates[car];
+      const match = normalizePlate(value).match(/^(.+?)\s+(\d{4})$/u);
+      return match ? {letters:match[1], numbers:match[2]} : {letters:normalizePlate(value), numbers:""};
+    }
+    function saudiPlateMarkup(car, value) {
+      const plate = plateParts(car, value);
+      return `<span class="saudi-plate" aria-label="لوحة ${escapeHTML(plate.letters)} ${escapeHTML(plate.numbers)}"><span class="plate-numbers" dir="ltr">${escapeHTML(plate.numbers || "—")}</span><span class="plate-letters" dir="rtl">${escapeHTML(plate.letters || "—")}</span></span>`;
+    }
+    const originalRecordIds = new Set(records.map((record) => record.id));
+    const deletedStorageKey = "traffic-violations-deleted-record-ids-v1";
+    let deletedRecordIds = new Set();
+    const storageKey = "traffic-violations-editable-fields-v1";
+    const addedStorageKey = "traffic-violations-added-records-v1";
+    const statusValues = ["تم السداد", "تم الحسم", "لم تسدد"];
+    function normalizeTime(value) {
+      const text = String(value || "").trim();
+      const match = text.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
+      if (!match || Number(match[1]) > 23 || Number(match[2]) > 59 || Number(match[3] || 0) > 59) return "";
+      return `${match[1]}:${match[2]}`;
+    }
+    let storageAvailable = true;
+    let externalFileHandle = null;
+    let externalFileLoaded = false;
+    let externalFileFormat = "csv";
+    let lastImportWasRecovery = false;
+    let saved = null;
+    let additions = [];
+    try {
+      saved = JSON.parse(window.localStorage.getItem(storageKey) || "null");
+      additions = JSON.parse(window.localStorage.getItem(addedStorageKey) || "[]");
+      const deleted = JSON.parse(window.localStorage.getItem(deletedStorageKey) || "[]");
+      if (Array.isArray(deleted)) deletedRecordIds = new Set(deleted.map(String));
+    } catch (error) { storageAvailable = false; }
+    records.forEach((record, index) => editableFields.forEach((field) => {
+      const savedRecord = Array.isArray(saved) && saved[index] && saved[index].id === record.id ? saved[index] : null;
+      if (field === "type") record.type = savedRecord && savedRecord.type != null ? String(savedRecord.type) : record.type;
+      else if (field === "status") record.status = savedRecord && statusValues.includes(String(savedRecord.status)) ? String(savedRecord.status) : "";
+      else record[field] = savedRecord ? String(savedRecord[field] ?? "") : "";
+    }));
+    for (let i = records.length - 1; i >= 0; i--) {
+      if (deletedRecordIds.has(records[i].id)) records.splice(i, 1);
+    }
+    if (Array.isArray(additions)) additions.forEach((record) => {
+      if (record && /^\d+$/.test(String(record.id)) && /^\d{4}-\d{2}-\d{2}$/.test(String(record.date)) && Number.isFinite(Number(record.amount))) {
+        records.push({category:String(record.category || "مخالفاتي"), type:String(record.type || "مخالفة مرورية"), date:String(record.date), id:String(record.id), amount:Number(record.amount), time:normalizeTime(record.time), location:String(record.location || ""), car:String(record.car || ""), plate:plateValueForCar(String(record.car || "")) || String(record.plate || ""), user:String(record.user || ""), status:statusValues.includes(String(record.status)) ? String(record.status) : "", userAdded:true});
+      }
+    });
+    const $ = (selector) => document.querySelector(selector);
+    function updateNewCarPlate() {
+      const car = $("#new-car").value;
+      const plate = vehiclePlates[car];
+      $("#new-plate").value = plate ? `${plate.letters} ${plate.numbers}` : "";
+      $("#new-plate-car-name").textContent = car || "اختر السيارة لعرض لوحتها";
+      $("#new-plate-preview").hidden = !plate;
+      $("#new-plate-numbers").textContent = plate ? plate.numbers : "—";
+      $("#new-plate-letters").textContent = plate ? plate.letters : "—";
+    }
+    $("#new-car").addEventListener("change", updateNewCarPlate);
+    const EDIT_PASSWORD = "1144";
+    let editAuthorized = false;
+    let editMode = false;
+    function authorizeEdit() {
+      if (editAuthorized) return true;
+      const entered = window.prompt("أدخل كلمة المرور للسماح بالتعديل:");
+      if (entered === EDIT_PASSWORD) {
+        editAuthorized = true;
+        return true;
+      }
+      if (entered !== null) window.alert("كلمة المرور غير صحيحة؛ لم يتم السماح بالتعديل.");
+      return false;
+    }
+    // احمِ نقاط الدخول إلى عمليات التغيير؛ كلمة المرور حماية واجهة محلية وليست تشفيرًا للملف.
+    document.addEventListener("focusin", (event) => {
+      if (event.target.matches("[data-edit-field]") && !editMode) event.target.blur();
+    }, true);
+    document.addEventListener("click", (event) => {
+      if (event.target.closest("#add-panel summary, #save-data, #import-data") && !authorizeEdit()) {
+        event.preventDefault(); event.stopImmediatePropagation();
+        if (event.target.closest("#add-panel summary")) $("#add-panel").open = false;
+      }
+    }, true);
+    $("#add-record-form").addEventListener("submit", (event) => {
+      if (!authorizeEdit()) event.preventDefault();
+    }, true);
+    $("#edit-mode").addEventListener("click", () => {
+      if (editMode) {
+        editMode = false;
+        editAuthorized = false;
+        $("#edit-mode").textContent = "تعديل المخالفات";
+        $("#edit-mode").setAttribute("aria-pressed", "false");
+        $("#edit-mode").classList.remove("edit-active");
+        render();
+        return;
+      }
+      const warningAccepted = window.confirm("تحذير مهم: ستتمكن من تعديل بيانات المخالفات وحذفها. عند الحذف سينشأ ملف Recovery، ويمكنك استعادة المخالفة لاحقًا من زر الاستيراد. هل تريد المتابعة؟");
+      if (!warningAccepted || !authorizeEdit()) return;
+      editMode = true;
+      $("#edit-mode").textContent = "إنهاء التعديل";
+      $("#edit-mode").setAttribute("aria-pressed", "true");
+      $("#edit-mode").classList.add("edit-active");
+      render();
+    });
+    const westernNumber = new Intl.NumberFormat("en-US", {useGrouping: false});
+    let sortKey = "date";
+    let sortDirection = -1;
+    let printingAllRecords = false;
+
+    function refreshStatusFilter() {
+      const select = $("#status-filter");
+      const current = select.value;
+      select.innerHTML = "";
+      const allOption = document.createElement("option");
+      allOption.value = ""; allOption.textContent = "كل الحالات"; select.appendChild(allOption);
+      statusValues.forEach((status) => {
+        const option = document.createElement("option"); option.value = status; option.textContent = status; select.appendChild(option);
+      });
+      if ([...select.options].some((option) => option.value === current)) select.value = current;
+    }
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, (character) => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#39;"}[character]));
+    }
+    function persistRecords() {
+      if (!storageAvailable) throw new Error("local storage unavailable");
+      const saved = records.map((record) => ({id: record.id, ...Object.fromEntries(editableFields.map((field) => [field, field === "plate" ? (plateValueForCar(record.car) || record.plate || "") : (record[field] || "")]))}));
+      const additions = records.filter((record) => record.userAdded).map((record) => ({category:record.category, type:record.type, date:record.date, time:normalizeTime(record.time), id:record.id, amount:record.amount, location:record.location, car:record.car, plate:plateValueForCar(record.car) || record.plate || "", user:record.user, status:record.status}));
+      window.localStorage.setItem(storageKey, JSON.stringify(saved));
+      window.localStorage.setItem(addedStorageKey, JSON.stringify(additions));
+      window.localStorage.setItem(deletedStorageKey, JSON.stringify([...deletedRecordIds]));
+    }
+    function createExternalState() {
+      return {
+        version: 1,
+        updatedAt: new Date().toISOString(),
+        editable: records.map((record) => ({id:record.id, ...Object.fromEntries(editableFields.map((field) => [field, field === "plate" ? (plateValueForCar(record.car) || record.plate || "") : (record[field] || "")]))})),
+        additions: records.filter((record) => record.userAdded).map((record) => ({category:record.category, type:record.type, date:record.date, time:normalizeTime(record.time), id:record.id, amount:record.amount, location:record.location, car:record.car, plate:plateValueForCar(record.car) || record.plate || "", user:record.user, status:record.status})),
+        deletedIds: [...deletedRecordIds]
+      };
+    }
+    function applyExternalState(state) {
+      if (!state || state.version !== 1 || !Array.isArray(state.editable) || !Array.isArray(state.additions)) throw new Error("ملف البيانات غير صالح أو بإصدار غير مدعوم.");
+      deletedRecordIds = new Set(Array.isArray(state.deletedIds) ? state.deletedIds.map(String) : []);
+      const baseRecords = records.filter((record) => !record.userAdded && !deletedRecordIds.has(record.id));
+      const savedById = new Map(state.editable.map((record) => [String(record.id), record]));
+      baseRecords.forEach((record) => {
+        const savedRecord = savedById.get(record.id);
+        if (!savedRecord) return;
+        editableFields.forEach((field) => {
+          if (field === "status") record.status = statusValues.includes(String(savedRecord.status)) ? String(savedRecord.status) : "";
+          else if (typeof savedRecord[field] === "string") record[field] = savedRecord[field];
+        });
+      });
+      records.splice(0, records.length, ...baseRecords);
+      const seenIds = new Set(records.map((record) => record.id));
+      state.additions.forEach((record) => {
+        const id = String(record && record.id || "");
+        if (!record || !/^\d+$/.test(id) || seenIds.has(id) || !/^\d{4}-\d{2}-\d{2}$/.test(String(record.date)) || !Number.isFinite(Number(record.amount))) return;
+        records.push({category:"مخالفاتي", type:String(record.type || ""), date:String(record.date), id, amount:Number(record.amount), time:normalizeTime(record.time), location:String(record.location || ""), car:String(record.car || ""), plate:plateValueForCar(String(record.car || "")) || String(record.plate || ""), user:String(record.user || ""), status:statusValues.includes(String(record.status)) ? String(record.status) : "", userAdded:true});
+        seenIds.add(id);
+      });
+    }
+    const externalCSVHeaders = ["رقم المخالفة", "تاريخ المخالفة", "وقت المخالفة", "المبلغ الأساسي", "نوع المخالفة", "موقع المخالفة", "السيارة", "رقم اللوحة", "اسم المستخدم", "حالة السداد", "الفئة", "مضافة يدويًا"];
+    function csvCell(value) {
+      let text = String(value ?? "");
+      if (/^[\t\r ]*[=+\-@]/.test(text)) text = "'" + text;
+      return `"${text.replaceAll('"', '""')}"`;
+    }
+    function createExternalCSV() {
+      const rows = records.map((record) => [record.id, record.date, normalizeTime(record.time), record.amount, record.type, record.location, record.car, plateValueForCar(record.car) || record.plate || "", record.user, record.status, record.category || "مخالفاتي", record.userAdded ? "نعم" : "لا"]);
+      return "\uFEFF" + [externalCSVHeaders, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
+    }
+    function parseCSV(text) {
+      const rows = [];
+      let row = [], field = "", quoted = false;
+      text = String(text).replace(/^\uFEFF/, "");
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (quoted) {
+          if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+          else if (ch === '"') quoted = false;
+          else field += ch;
+        } else if (ch === '"' && field === "") quoted = true;
+        else if (ch === ",") { row.push(field); field = ""; }
+        else if (ch === "\n" || ch === "\r") {
+          if (ch === "\r" && text[i + 1] === "\n") i++;
+          row.push(field); field = "";
+          if (row.some((cell) => cell !== "")) rows.push(row);
+          row = [];
+        } else field += ch;
+      }
+      if (field !== "" || row.length) { row.push(field); if (row.some((cell) => cell !== "")) rows.push(row); }
+      return rows;
+    }
+    function applyExternalCSV(text) {
+      const rows = parseCSV(text);
+      if (rows.length < 2) throw new Error("ملف CSV فارغ أو لا يحتوي على بيانات.");
+      const headers = rows[0].map((value) => value.trim());
+      const column = (...names) => names.map((name) => headers.indexOf(name)).find((index) => index >= 0) ?? -1;
+      const idCol = column("رقم المخالفة");
+      const dateCol = column("تاريخ المخالفة");
+      const amountCol = column("المبلغ الأساسي", "المبلغ");
+      if ([idCol, dateCol, amountCol].some((index) => index < 0)) throw new Error("تعذر استيراد CSV: يجب أن يتضمن أعمدة رقم المخالفة وتاريخ المخالفة والمبلغ الأساسي.");
+      const cols = {
+        time:column("وقت المخالفة", "الوقت"), type:column("نوع المخالفة"), location:column("موقع المخالفة"), car:column("السيارة"), plate:column("رقم اللوحة"), user:column("اسم المستخدم"),
+        status:column("حالة السداد"), category:column("الفئة"), userAdded:column("مضافة يدويًا")
+      };
+      let imported = 0;
+      const seen = new Set();
+      rows.slice(1).forEach((values) => {
+        const value = (index) => index >= 0 ? String(values[index] ?? "").trim() : "";
+        const id = value(idCol).replace(/^'/, "");
+        const date = value(dateCol);
+        const amountText = value(amountCol).replace(/,/g, "");
+        const amount = Number(amountText);
+        if (!/^\d+$/.test(id) || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(amount) || seen.has(id)) return;
+        seen.add(id);
+        deletedRecordIds.delete(id);
+        const existing = records.find((record) => record.id === id);
+        const status = value(cols.status);
+        const isAdded = ["نعم", "yes", "true", "1"].includes(value(cols.userAdded).toLowerCase());
+        const next = existing || {category:"مخالفاتي", type:"مخالفة مرورية", date, id, amount, location:"", car:"", plate:"", user:"", status:"", userAdded:true};
+        next.date = date;
+        if (cols.time >= 0) next.time = normalizeTime(value(cols.time));
+        else next.time = normalizeTime(next.time);
+        next.amount = amount;
+        if (cols.type >= 0 && value(cols.type)) next.type = value(cols.type);
+        if (cols.location >= 0) next.location = value(cols.location);
+        if (cols.car >= 0) next.car = value(cols.car);
+        if (cols.plate >= 0) next.plate = plateValueForCar(next.car) || normalizePlate(value(cols.plate));
+        if (cols.user >= 0) next.user = value(cols.user);
+        if (cols.status >= 0) next.status = statusValues.includes(status) ? status : "";
+        if (cols.category >= 0 && value(cols.category)) next.category = value(cols.category);
+        if (!existing) next.userAdded = true;
+        if (!existing) records.push(next);
+        else if (isAdded) existing.userAdded = true;
+        imported++;
+      });
+      if (!imported) throw new Error("لم يتم العثور على صفوف صحيحة في ملف CSV. تحقق من رقم المخالفة والتاريخ والمبلغ.");
+      // ملف CSV الكامل الذي تصدره الصفحة يعامل كلقطة كاملة؛ الصفوف المحذوفة لا تعود عند الاستيراد.
+      if (cols.userAdded >= 0) {
+        for (let i = records.length - 1; i >= 0; i--) {
+          if (!seen.has(records[i].id)) {
+            if (originalRecordIds.has(records[i].id)) deletedRecordIds.add(records[i].id);
+            records.splice(i, 1);
+          }
+        }
+      }
+      return imported;
+    }
+    function fileDate() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    }
+    let lastFilenameTimestamp = "";
+    let filenameCollisionSequence = 0;
+    function fileTimestamp() {
+      const now = new Date();
+      const pad = (value, length = 2) => String(value).padStart(length, "0");
+      const base = `${fileDate()}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}-${pad(now.getMilliseconds(), 3)}`;
+      if (base === lastFilenameTimestamp) filenameCollisionSequence++;
+      else { lastFilenameTimestamp = base; filenameCollisionSequence = 0; }
+      return base + (filenameCollisionSequence ? `-${filenameCollisionSequence}` : "");
+    }
+    function downloadExternalFile(payload, format, prefix = "traffic_violations_data") {
+      const mime = format === "csv" ? "text/csv;charset=utf-8" : "application/json;charset=utf-8";
+      const url = URL.createObjectURL(new Blob([payload], {type:mime}));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${prefix}_${fileTimestamp()}.${format}`;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    function applyRecoveryFile(data) {
+      if (!data || data.documentType !== "Traffic violation recovery record" || !data.record) return false;
+      const savedRecord = data.record;
+      const id = String(savedRecord.id || "");
+      if (!/^\d+$/.test(id) || !/^\d{4}-\d{2}-\d{2}$/.test(String(savedRecord.date)) || !Number.isFinite(Number(savedRecord.amount))) throw new Error("ملف الاستعادة غير مكتمل أو غير صالح.");
+      const existingIndex = records.findIndex((record) => record.id === id);
+      const restored = {category:String(savedRecord.category || "مخالفاتي"), type:String(savedRecord.type || "مخالفة مرورية"), date:String(savedRecord.date), time:normalizeTime(savedRecord.time), id, amount:Number(savedRecord.amount), location:String(savedRecord.location || ""), car:String(savedRecord.car || ""), plate:plateValueForCar(String(savedRecord.car || "")) || normalizePlate(savedRecord.plate || ""), user:String(savedRecord.user || ""), status:statusValues.includes(String(savedRecord.status)) ? String(savedRecord.status) : "", userAdded:true};
+      if (existingIndex >= 0) records[existingIndex] = restored;
+      else records.push(restored);
+      deletedRecordIds.delete(id);
+      persistRecords();
+      refreshStatusFilter(); render();
+      $("#save-status").textContent = `تمت استعادة المخالفة رقم ${id} بكامل حقولها من ملف Recovery.`;
+      lastImportWasRecovery = true;
+      return true;
+    }
+    async function readExternalHandle(handle) {
+      const file = await handle.getFile();
+      externalFileFormat = file.name.toLowerCase().endsWith(".json") ? "json" : "csv";
+      const text = await file.text();
+      lastImportWasRecovery = false;
+      if (externalFileFormat === "csv") applyExternalCSV(text);
+      else {
+        const json = JSON.parse(text);
+        if (!applyRecoveryFile(json)) {
+          applyExternalState(json);
+          externalFileHandle = handle;
+          externalFileLoaded = true;
+        } else {
+          externalFileHandle = null;
+          externalFileLoaded = false;
+        }
+      }
+      if (externalFileFormat === "csv") { externalFileHandle = handle; externalFileLoaded = true; }
+      return text;
+    }
+    async function saveExternalData() {
+      externalFileFormat = externalFileFormat || "csv";
+      const payload = externalFileFormat === "csv" ? createExternalCSV() : JSON.stringify(createExternalState(), null, 2);
+      downloadExternalFile(payload, externalFileFormat);
+      return "downloaded";
+    }
+
+    function addCalendarMonths(dateString, months) {
+      const [year, month, day] = dateString.split("-").map(Number);
+      const targetMonth = new Date(Date.UTC(year, month - 1 + months, 1));
+      const lastDay = new Date(Date.UTC(targetMonth.getUTCFullYear(), targetMonth.getUTCMonth() + 1, 0)).getUTCDate();
+      targetMonth.setUTCDate(Math.min(day, lastDay));
+      return `${targetMonth.getUTCFullYear()}-${String(targetMonth.getUTCMonth() + 1).padStart(2, "0")}-${String(targetMonth.getUTCDate()).padStart(2, "0")}`;
+    }
+    function addDays(dateString, days) {
+      const date = new Date(`${dateString}T00:00:00Z`);
+      date.setUTCDate(date.getUTCDate() + days);
+      return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
+    }
+    function amountInfo(record) {
+      const nextAmount = record.amount === 75 ? 100 : record.amount === 113 ? 150 : record.amount === 225 ? 300 :
+record.amount === 600 ? 800 : null;
+      if (nextAmount === null) return {amount: record.amount, nextAmount: null, dueDate: null, changed: false};
+      const dueDate = addDays(record.date, 49);
+      const now = new Date();
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+      const changed = today >= dueDate;
+      return {amount: changed ? nextAmount : record.amount, nextAmount, dueDate, changed};
+    }
+    function displayDate(dateString) { return dateString.replaceAll("-", "/"); }
+    function elapsedDuration(dateString) {
+      const now = new Date();
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+      const startTime = Date.parse(`${dateString}T00:00:00Z`);
+      const todayTime = Date.parse(`${today}T00:00:00Z`);
+      const days = Math.round((todayTime - startTime) / 86400000);
+      if (days < 0) return {days, label:`تاريخ مستقبلي · يتبقى ${westernNumber.format(Math.abs(days))} يومًا`};
+      if (days === 0) return {days, months:0, remainingDays:0, label:"اليوم (0 يومًا)"};
+      let months = (now.getFullYear() - Number(dateString.slice(0, 4))) * 12 + (now.getMonth() + 1 - Number(dateString.slice(5, 7)));
+      if (addCalendarMonths(dateString, months) > today) months--;
+      const afterMonths = addCalendarMonths(dateString, months);
+      const remainingDays = Math.round((todayTime - Date.parse(`${afterMonths}T00:00:00Z`)) / 86400000);
+      const monthText = months === 1 ? "شهر" : months === 2 ? "شهران" : `${westernNumber.format(months)} أشهر`;
+      const dayText = remainingDays === 1 ? "يوم" : remainingDays === 2 ? "يومان" : `${westernNumber.format(remainingDays)} يومًا`;
+      const calendarText = months ? `${monthText}${remainingDays ? ` و${dayText}` : ""}` : dayText;
+      return {days, months, remainingDays, label:`${calendarText} (${westernNumber.format(days)} يومًا)`};
+    }
+
+    function filteredRecords() {
+      const query = printingAllRecords ? "" : $("#search").value.trim().toLocaleLowerCase("ar");
+      const status = printingAllRecords ? "" : $("#status-filter").value;
+      const car = printingAllRecords ? "" : $("#car-filter").value;
+      const from = printingAllRecords ? "" : $("#from-date").value;
+      const to = printingAllRecords ? "" : $("#to-date").value;
+      return records.filter((r) => {
+        const info = amountInfo(r);
+        const duration = elapsedDuration(r.date);
+        const searchable = `${Object.entries(r).filter(([key]) => key !== "category" && key !== "userAdded").map(([, value]) => value).join(" ")} ${info.amount} ${info.nextAmount || ""} ${duration.label}`.toLocaleLowerCase("ar");
+        return (!query || searchable.includes(query)) && (!status || r.status === status) && (!car || r.car === car) && (!from || r.date >= from) && (!to || r.date <= to);
+      }).sort((a,b) => {
+        const av = sortKey === "amount" ? amountInfo(a).amount : a[sortKey];
+        const bv = sortKey === "amount" ? amountInfo(b).amount : b[sortKey];
+        const compare = typeof av === "number" ? av - bv : String(av).localeCompare(String(bv), "ar");
+        return compare * sortDirection;
+      });
+    }
+    function carCellMarkup(record) {
+      const car = vehicleOptions.includes(record.car) ? record.car : "";
+      if (printingAllRecords) return `<div class="vehicle-cell"><span class="car-print-name">${escapeHTML(car || record.car || "—")}</span>${saudiPlateMarkup(car, record.plate)}</div>`;
+      const disabled = editMode ? "" : " disabled";
+      const modelView = editMode
+        ? `<select class="cell-input vehicle-select" data-edit-field="car" aria-label="نوع السيارة للمخالفة ${escapeHTML(record.id)}"><option value="">اختر السيارة</option>${vehicleOptions.map((name) => `<option value="${name}">${name}</option>`).join("")}</select>`
+        : `<button class="vehicle-name car-quick-filter" type="button" data-quick-car-filter="${escapeHTML(car || record.car || "")}" title="عرض جميع مخالفات هذه السيارة">${escapeHTML(car || record.car || "لم تُحدد السيارة")}</button>`;
+      return `<div class="vehicle-cell">${modelView}${saudiPlateMarkup(car, record.plate)}<input type="hidden" data-edit-field="plate" value="${escapeHTML(plateValueForCar(car) || record.plate || "")}"${disabled}></div>`;
+    }
+    function editableCellMarkup(record, field) {
+      const value = record[field] || "";
+      const statusClass = value === "تم السداد" ? " status-paid" : value === "تم الحسم" ? " status-deducted" : value === "لم تسدد" ? " status-unpaid" : "";
+      if (printingAllRecords) return `<span class="print-cell${field === "status" ? statusClass : ""}">${escapeHTML(value || "—")}</span>`;
+      const disabled = editMode ? "" : " disabled";
+      if (field === "status") return `<select class="cell-input${statusClass}" data-edit-field="status" aria-label="حالة السداد للمخالفة ${escapeHTML(record.id)}"${disabled}><option value="">اختر الحالة</option><option value="تم السداد">تم السداد</option><option value="تم الحسم">تم الحسم</option><option value="لم تسدد">لم تسدد</option></select>`;
+      const extraClass = field === "type" ? " type-input" : field === "user" ? " user-input" : "";
+      const labels = {type:"نوع المخالفة", location:"الموقع", car:"السيارة", user:"اسم المستخدم"};
+      return `<input class="cell-input${extraClass}" type="text" data-edit-field="${field}" aria-label="${labels[field]} للمخالفة ${escapeHTML(record.id)}"${disabled}>`;
+    }
+    function locationCellMarkup(record) {
+      const value = String(record.location || "").trim();
+      if (printingAllRecords) return `<span class="print-cell">${escapeHTML(value || "—")}</span>`;
+      if (editMode) return editableCellMarkup(record, "location");
+      return `<div class="location-marquee" title="${escapeHTML(value)}"><span class="location-marquee-text">${escapeHTML(value || "—")}</span></div>`;
+    }
+    function activateLocationMarquees(root) {
+      window.requestAnimationFrame(() => root.querySelectorAll(".location-marquee").forEach((box) => {
+        const text = box.querySelector(".location-marquee-text");
+        const distance = text.scrollWidth - box.clientWidth;
+        if (distance > 8) {
+          box.classList.add("is-long");
+          box.style.setProperty("--scroll-distance", `-${distance}px`);
+          box.style.setProperty("--scroll-duration", `${Math.max(5, Math.min(16, distance / 22))}s`);
+        }
+      }));
+    }
+    function render() {
+      const shown = filteredRecords();
+      const tbody = $("#rows");
+      tbody.closest("table").classList.toggle("editing", editMode && !printingAllRecords);
+      const paidRecords = shown.filter((record) => record.status === "تم السداد");
+      const deductedRecords = shown.filter((record) => record.status === "تم الحسم");
+      const unpaidRecords = shown.filter((record) => record.status !== "تم السداد" && record.status !== "تم الحسم");
+      const unresolvedRecords = unpaidRecords;
+      const totalAmount = shown.reduce((sum, record) => sum + amountInfo(record).amount, 0);
+      const paidAmount = paidRecords.reduce((sum, record) => sum + amountInfo(record).amount, 0);
+      const deductedAmount = deductedRecords.reduce((sum, record) => sum + amountInfo(record).amount, 0);
+      const unpaidAmount = unresolvedRecords.reduce((sum, record) => sum + amountInfo(record).amount, 0);
+      const paidPercent = totalAmount ? Math.min(100, Math.round(paidAmount / totalAmount * 100)) : 0;
+      const deductedPercent = totalAmount ? Math.min(100 - paidPercent, Math.round(deductedAmount / totalAmount * 100)) : 0;
+      $("#total-amount").textContent = westernNumber.format(totalAmount);
+      $("#paid-amount").textContent = westernNumber.format(paidAmount);
+      $("#unpaid-amount").textContent = westernNumber.format(unpaidAmount);
+      $("#paid-bar").style.width = `${paidPercent}%`;
+      $("#deducted-bar").style.width = `${deductedPercent}%`;
+      $("#unpaid-bar").style.flex = totalAmount ? String(Math.max(0, 100 - paidPercent - deductedPercent)) : "0";
+      $("#payment-ratio").textContent = `الإحصاءات حسب النتائج المعروضة: ${westernNumber.format(shown.length)} مخالفة`;
+      $("#paid-count").textContent = `تم السداد: ${westernNumber.format(paidRecords.length)}`;
+      $("#deducted-count").textContent = `تم الحسم: ${westernNumber.format(deductedRecords.length)}`;
+      $("#unpaid-count").textContent = `لم تسدد: ${westernNumber.format(unpaidRecords.length)}`;
+      $("#count-paid").textContent = westernNumber.format(paidRecords.length);
+      $("#count-deducted").textContent = westernNumber.format(deductedRecords.length);
+      $("#count-unpaid").textContent = westernNumber.format(unpaidRecords.length);
+      if (!shown.length) {
+        tbody.innerHTML = `<tr><td class="empty" colspan="${editMode ? 9 : 8}">لا توجد نتائج مطابقة للفلاتر الحالية.</td></tr>`;
+      } else {
+        tbody.innerHTML = shown.map((r) => `<tr data-record-id="${escapeHTML(r.id)}">
+          <td class="date-cell"><span class="number">${r.date.replaceAll("-", "/")}</span><small class="violation-time">${escapeHTML(r.time || "غير مسجل")}</small><small class="duration-note">${escapeHTML(elapsedDuration(r.date).label)}</small></td>
+          <td><span class="number">${r.id}</span></td>
+          <td>${editableCellMarkup(r, "type")}</td>
+          <td class="amount"><span class="number">${westernNumber.format(amountInfo(r).amount)}</span>${amountInfo(r).nextAmount === null ? "" : amountInfo(r).changed
+            ? `<small class="amount-note changed">تغيّر بعد 49 يومًا<br>الأساس <span class="number">${westernNumber.format(r.amount)}</span></small>`
+            : `<small class="amount-note">سيصبح <span class="number">${westernNumber.format(amountInfo(r).nextAmount)}</span><br>بتاريخ <span class="number">${displayDate(amountInfo(r).dueDate)}</span></small>`}</td>
+          <td>${locationCellMarkup(r)}</td>
+          <td>${carCellMarkup(r)}</td>
+          <td>${editableCellMarkup(r, "user")}</td>
+          <td>${editableCellMarkup(r, "status")}</td>
+          <td class="delete-column"><button class="delete-record" type="button" data-delete-record="${escapeHTML(r.id)}">حذف</button></td>
+        </tr>`).join("");
+        activateLocationMarquees(tbody);
+        tbody.querySelectorAll("[data-edit-field]").forEach((input) => {
+          const record = records.find((item) => item.id === input.closest("tr").dataset.recordId);
+          input.value = input.dataset.editField === "plate" ? (plateValueForCar(record.car) || record.plate || "") : (record[input.dataset.editField] || "");
+          if (input.dataset.editField === "status") {
+            input.classList.toggle("status-paid", input.value === "تم السداد");
+            input.classList.toggle("status-unpaid", input.value === "لم تسدد");
+            input.classList.toggle("status-deducted", input.value === "تم الحسم");
+          }
+        });
+      }
+      $("#total-count").textContent = westernNumber.format(shown.length);
+      $("#result-count").textContent = `عدد النتائج: ${westernNumber.format(shown.length)} من ${westernNumber.format(records.length)}`;
+    }
+    ["#search", "#status-filter", "#car-filter", "#from-date", "#to-date"].forEach((s) => {
+      $(s).addEventListener("input", render);
+      $(s).addEventListener("change", render);
+    });
+    $("#rows").addEventListener("click", (event) => {
+      const carQuickFilter = event.target.closest("[data-quick-car-filter]");
+      if (carQuickFilter && !editMode) {
+        $("#car-filter").value = carQuickFilter.dataset.quickCarFilter;
+        render();
+        return;
+      }
+      const deleteButton = event.target.closest("[data-delete-record]");
+      if (!deleteButton || !editMode) return;
+      const id = deleteButton.dataset.deleteRecord;
+      const record = records.find((item) => item.id === id);
+      if (!record) return;
+      const confirmed = window.confirm(`تأكيد الحذف: هل تريد حذف المخالفة رقم ${id}؟ سيُنزّل ملف Recovery مستقل يحتوي تفاصيلها قبل الإزالة.`);
+      if (!confirmed) return;
+      const amountDetails = amountInfo(record);
+      const recoveryFile = {
+        documentType: "Traffic violation recovery record",
+        version: 1,
+        deletedAt: new Date().toISOString(),
+        record: {
+          category: record.category || "",
+          type: record.type || "",
+          date: record.date,
+          time: normalizeTime(record.time),
+          id: record.id,
+          amount: record.amount,
+          currentAmount: amountDetails.amount,
+          nextAmount: amountDetails.nextAmount,
+          nextAmountDate: amountDetails.dueDate,
+          location: record.location || "",
+          car: record.car || "",
+          plate: plateValueForCar(record.car) || record.plate || "",
+          user: record.user || "",
+          status: record.status || "",
+          userAdded: Boolean(record.userAdded)
+        }
+      };
+      downloadExternalFile(JSON.stringify(recoveryFile, null, 2), "json", `Recovery_traffic_violation_${id}`);
+      const index = records.findIndex((item) => item.id === id);
+      if (index >= 0) records.splice(index, 1);
+      if (originalRecordIds.has(id)) deletedRecordIds.add(id);
+      try { persistRecords(); } catch (error) { storageAvailable = false; }
+      refreshStatusFilter();
+      render();
+      $("#save-status").textContent = `حُذفت المخالفة رقم ${id}؛ تم تنزيل ملف Recovery بتفاصيلها. احفظ CSV أو JSON لتحديث نسخة السجل.`;
+    });
+    const handleEditableField = (event) => {
+      const input = event.target.closest("[data-edit-field]");
+      if (!input || !editMode) return;
+      const record = records.find((item) => item.id === input.closest("tr").dataset.recordId);
+      record[input.dataset.editField] = input.value;
+      if (input.dataset.editField === "car") {
+        record.plate = plateValueForCar(input.value);
+        render();
+      }
+      if (input.dataset.editField === "status") {
+        input.classList.toggle("status-paid", input.value === "تم السداد");
+        input.classList.toggle("status-unpaid", input.value === "لم تسدد");
+        input.classList.toggle("status-deducted", input.value === "تم الحسم");
+        render();
+      }
+      $("#save-status").textContent = "توجد تعديلات لم تُحفظ بعد.";
+    };
+    $("#rows").addEventListener("input", handleEditableField);
+    $("#rows").addEventListener("change", handleEditableField);
+    $("#save-json").addEventListener("click", () => {
+      try {
+        persistRecords();
+      } catch (error) { storageAvailable = false; }
+      const payload = JSON.stringify(createExternalState(), null, 2);
+      downloadExternalFile(payload, "json");
+      $("#save-status").textContent = `تم تنزيل نسخة JSON كاملة بتاريخ ووقت الآن وتشمل جميع المخالفات والحقول.`;
+    });
+    $("#save-data").addEventListener("click", async () => {
+      try {
+        persistRecords();
+      } catch (error) { storageAvailable = false; }
+      try {
+        const result = await saveExternalData();
+        const formatName = externalFileFormat.toUpperCase();
+        $("#save-status").textContent = result === "written" ? `تم حفظ البيانات كاملة في ملف ${formatName} الخارجي.` : `تم تنزيل ملف ${formatName} كامل بتاريخ ووقت الآن؛ استورده عند فتح الصفحة لاحقًا.`;
+      } catch (error) {
+        $("#save-status").textContent = error.name === "AbortError" ? "أُلغي اختيار ملف البيانات؛ لم يتغير الملف الخارجي." : (error.message || "تعذر حفظ الملف الخارجي.");
+      }
+    });
+    async function importExternalFile() {
+      try {
+        lastImportWasRecovery = false;
+        let handle = null;
+        if (externalFileHandle && !externalFileLoaded && typeof externalFileHandle.requestPermission === "function") {
+          const permission = await externalFileHandle.requestPermission({mode:"read"});
+          if (permission === "granted") handle = externalFileHandle;
+        }
+        if (!handle && typeof window.showOpenFilePicker === "function") {
+          const handles = await window.showOpenFilePicker({multiple:false, types:[{description:"ملف بيانات المخالفات (CSV أو JSON)", accept:{"text/csv":[".csv"], "application/json":[".json"]}}]});
+          handle = handles[0];
+        }
+        if (handle) {
+          await readExternalHandle(handle);
+          try { persistRecords(); } catch (error) {}
+          refreshStatusFilter(); render();
+          if (!lastImportWasRecovery) $("#save-status").textContent = `تم استيراد ملف ${externalFileFormat.toUpperCase()}؛ الحفظ التالي ينشئ نسخة جديدة بتاريخ ووقت مميزين.`;
+          return;
+        }
+        $("#import-file").click();
+      } catch (error) {
+        if (error.name !== "AbortError") $("#save-status").textContent = error.message || "تعذر فتح ملف البيانات الخارجي.";
+      }
+    }
+    $("#import-data").addEventListener("click", importExternalFile);
+    $("#import-file").addEventListener("change", async (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        lastImportWasRecovery = false;
+        externalFileFormat = file.name.toLowerCase().endsWith(".json") ? "json" : "csv";
+        if (externalFileFormat === "csv") applyExternalCSV(text);
+        else {
+          const json = JSON.parse(text);
+          if (!applyRecoveryFile(json)) applyExternalState(json);
+        }
+        externalFileHandle = null;
+        externalFileLoaded = false;
+        try { persistRecords(); } catch (error) {}
+        refreshStatusFilter(); render();
+        if (!lastImportWasRecovery) $("#save-status").textContent = `تم استيراد ملف ${externalFileFormat.toUpperCase()}؛ اضغط حفظ لتنزيل نسخة محدثة بتاريخ اليوم.`;
+      } catch (error) {
+        $("#save-status").textContent = error.message || "تعذرت قراءة ملف CSV أو JSON.";
+      } finally { event.target.value = ""; }
+    });
+    $("#add-record-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const id = $("#new-id").value.trim();
+      if (records.some((record) => record.id === id)) {
+        $("#add-message").textContent = "رقم المخالفة موجود مسبقًا؛ أدخل رقمًا آخر.";
+        return;
+      }
+      const plate = plateValueForCar($("#new-car").value);
+      if (!plate) {
+        $("#add-message").textContent = "اختر نوع السيارة لعرض لوحتها الصحيحة تلقائيًا.";
+        return;
+      }
+      const record = {
+        category:"مخالفاتي", type:$("#new-type").value.trim(), date:$("#new-date").value,
+        id, amount:Number($("#new-amount").value), time:normalizeTime($("#new-time").value), location:$("#new-location").value.trim(), car:$("#new-car").value,
+        plate, user:$("#new-user").value.trim(), status:$("#new-status").value.trim(), userAdded:true
+      };
+      records.push(record);
+      try {
+        persistRecords();
+        $("#save-status").textContent = "أُضيفت المخالفة محليًا مؤقتًا؛ احفظها في الملف الخارجي (CSV).";
+        $("#add-message").textContent = "أُضيفت المخالفة؛ اضغط حفظ في ملف خارجي CSV للاحتفاظ بها.";
+      } catch (error) {
+        $("#add-message").textContent = "أُضيفت في الصفحة؛ اضغط حفظ في ملف خارجي CSV للاحتفاظ بها.";
+      }
+      refreshStatusFilter(); render();
+      event.target.reset();
+      updateNewCarPlate();
+    });
+    document.querySelectorAll("[data-sort]").forEach((button) => button.addEventListener("click", () => {
+      const key = button.dataset.sort;
+      sortDirection = sortKey === key ? -sortDirection : (key === "date" ? -1 : 1);
+      sortKey = key;
+      render();
+    }));
+    $("#reset").addEventListener("click", () => {
+      $("#search").value = ""; $("#status-filter").value = ""; $("#car-filter").value = "";
+      $("#from-date").value = ""; $("#to-date").value = ""; render();
+    });
+    $("#export-excel").addEventListener("click", () => {
+      const headers = ["تاريخ المخالفة", "وقت المخالفة", "رقم المخالفة", "نوع المخالفة", "المبلغ الأساسي", "المبلغ الحالي", "المبلغ بعد التعديل", "تاريخ تطبيق التعديل", "المدة", "موقع المخالفة", "السيارة", "رقم اللوحة", "اسم المستخدم", "حالة السداد"];
+      const rows = filteredRecords().map((r) => {
+        const info = amountInfo(r);
+        return [r.date, r.time || "", r.id, r.type, r.amount, info.amount, info.nextAmount === null || info.changed ? "" : info.nextAmount, info.dueDate || "", elapsedDuration(r.date).label, r.location, r.car, plateValueForCar(r.car) || r.plate || "", r.user, r.status];
+      });
+      const xmlEscape = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&apos;"}[character]));
+      const cell = (value) => {
+        const numeric = typeof value === "number" && Number.isFinite(value);
+        return `<Cell><Data ss:Type="${numeric ? "Number" : "String"}">${xmlEscape(value)}</Data></Cell>`;
+      };
+      const tableRows = [headers, ...rows].map((row) => `<Row>${row.map(cell).join("")}</Row>`).join("");
+      const workbook = `<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="المخالفات"><Table>${tableRows}</Table></Worksheet></Workbook>`;
+      const url = URL.createObjectURL(new Blob(["\uFEFF", workbook], {type:"application/vnd.ms-excel;charset=utf-8"}));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `traffic_violations_${fileTimestamp()}.xls`;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+    $("#export-pdf").addEventListener("click", () => {
+      // اعرض كامل السجل أثناء الطباعة، ثم أعد البحث والفلاتر السابقة إلى الشاشة.
+      printingAllRecords = true;
+      const originalTitle = document.title;
+      document.title = `traffic_violations_${fileTimestamp()}`;
+      render();
+      const restoreScreen = () => {
+        document.title = originalTitle;
+        printingAllRecords = false;
+        render();
+        window.removeEventListener("afterprint", restoreScreen);
+      };
+      window.addEventListener("afterprint", restoreScreen);
+      window.print();
+      // احتياط للمتصفحات التي لا تطلق afterprint.
+      window.setTimeout(restoreScreen, 60000);
+    });
+    $("#export").addEventListener("click", () => {
+      const headers = ["تاريخ المخالفة", "وقت المخالفة", "رقم المخالفة", "نوع المخالفة", "المبلغ الأساسي", "المبلغ الحالي", "المبلغ بعد التعديل", "تاريخ تطبيق التعديل", "المدة", "موقع المخالفة", "السيارة", "رقم اللوحة", "اسم المستخدم", "حالة السداد"];
+      const rows = filteredRecords().map((r) => {
+        const info = amountInfo(r);
+        return [r.date, r.time || "", r.id, r.type, r.amount, info.amount, info.nextAmount === null || info.changed ? "" : info.nextAmount, info.dueDate || "", elapsedDuration(r.date).label, r.location, r.car, plateValueForCar(r.car) || r.plate || "", r.user, r.status];
+      });
+      const csvCell = (value) => {
+        let text = String(value ?? "");
+        if (/^[\t\r ]*[=+\-@]/.test(text)) text = "'" + text;
+        return `"${text.replaceAll('"', '""')}"`;
+      };
+      const csv = "\uFEFF" + [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
+      const url = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"}));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `traffic_violations_${fileTimestamp()}.csv`;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+    $("#back-to-top").addEventListener("click", () => window.scrollTo({top:0, behavior:"smooth"}));
+    window.addEventListener("scroll", () => $("#back-to-top").classList.toggle("visible", window.scrollY > 320), {passive:true});
+    function refreshAtNextDay() {
+      const now = new Date();
+      const nextDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1);
+      window.setTimeout(() => { render(); refreshAtNextDay(); }, nextDay.getTime() - now.getTime());
+    }
+    refreshStatusFilter();
+    render();
+    refreshAtNextDay();
+  </script>
+</body>
+</html>
