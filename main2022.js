@@ -1198,13 +1198,13 @@ function searfor() {
                         else {
                             var person_gender = "";
                             if (item.Gender == "") {
-                                person_gender = "gnome_stock_person.png";
+                                person_gender = "img/gnome_stock_person.png";
                             }
                             if (item.Gender == "M") {
-                                person_gender = "gnome_stock_personmale.png";
+                                person_gender = "img/gnome_stock_personmale.png";
                             }
                             if (item.Gender == "F") {
-                                person_gender = "gnome_stock_personfame.png";
+                                person_gender = "img/gnome_stock_personfame.png";
                             }
 
                             tempresult = tempresult.replace('**pic**', person_gender);
